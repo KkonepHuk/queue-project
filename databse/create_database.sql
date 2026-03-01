@@ -1,0 +1,77 @@
+CREATE TYPE queue_status AS ENUM ('WAITING', 'PASSED', 'SKIPPED');
+CREATE TYPE notification_status AS ENUM ('PENDING', 'SENT', 'READ');
+CREATE TYPE notification_type AS ENUM ('SYSTEM', 'QUEUE');
+CREATE TYPE system_role AS ENUM ('SYSTEM_ADMIN', 'USER');
+CREATE TYPE group_role AS ENUM ('OWNER', 'MODERATOR', 'MEMBER');
+
+
+--Таблица users
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    role system_role NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+-- Таблица groups
+CREATE TABLE groups (
+    group_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_by UUID REFERENCES users(user_id) NOT NULL ON DELETE RESTRICT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица group_members
+CREATE TABLE group_members (
+    group_member_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID REFERENCES groups(group_id) NOT NULL ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id) NOT NULL ON DELETE CASCADE,
+    role group_role NOT NULL,
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (group_id, user_id)
+);
+-- Таблица queues
+CREATE TABLE queues (
+    queue_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID REFERENCES groups(group_id) NOT NULL ON DELETE CASCADE,
+    created_by UUID REFERENCES users(user_id) NOT NULL ON DELETE RESTRICT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    event_date TIMESTAMP NOT NULL,
+    reg_open TIMESTAMP NOT NULL,
+    reg_close TIMESTAMP NOT NULL CHECK (reg_open < reg_close) CHECK (reg_open <= event_date),
+    max_size INTEGER NOT NULL CHECK (max_size > 0),
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
+
+-- Таблица queue_entries
+CREATE TABLE queue_entries (
+    queue_entry_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    queue_id UUID REFERENCES queues(queue_id) NOT NULL ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id) NOT NULL ON DELETE RESTRICT,
+    position INTEGER NOT NULL CHECK (position >= 1),
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status queue_status NOT NULL DEFAULT 'WAITING',
+    UNIQUE (queue_id, user_id),
+    UNIQUE (queue_id, position)
+);
+
+-- Таблица notifications
+CREATE TABLE notifications (
+    notification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(user_id) NOT NULL ON DELETE CASCADE,
+    queue_id UUID REFERENCES queues(queue_id) NOT NULL ON DELETE CASCADE,
+    type notification_type NOT NULL,
+    message TEXT NOT NULL,
+    scheduled_at TIMESTAMP NOT NULL,
+    sent_at TIMESTAMP,
+    status notification_status NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
