@@ -1,3 +1,4 @@
+--TODO: Изменить Enum на Varchar с проверкой
 CREATE TYPE queue_status AS ENUM ('WAITING', 'PASSED', 'SKIPPED');
 CREATE TYPE notification_status AS ENUM ('PENDING', 'SENT', 'READ');
 CREATE TYPE notification_type AS ENUM ('SYSTEM', 'QUEUE');
@@ -12,7 +13,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    role system_role NOT NULL,
+    role VARCHAR(20) DEFAULT 'USER' CHECK (role IN ('USER', 'SYSTEM_ADMIN')) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN NOT NULL DEFAULT true
 );
