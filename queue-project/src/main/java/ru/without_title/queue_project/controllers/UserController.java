@@ -21,6 +21,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Получить группы, которым нужны кураторы
+    @GetMapping("/groups-needing-curators")
+    public List<GroupForCuratorResponse> getGroupsNeedingCurators() {
+        return userService.getGroupsNeedingCurators();
+    }
+
     // --------------------- Регистрация ---------------------
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -41,5 +47,14 @@ public class UserController {
     public UserResponse getUserById(@PathVariable UUID userId) {
         User user = userService.getUserById(userId);
         return UserResponse.fromEntity(user);
+    }
+
+    // Получить группы, которые курирует пользователь
+    @GetMapping("/{userId}/curator-groups")
+    public List<GroupResponse> getCuratorGroups(@PathVariable UUID userId) {
+        List<Group> groups = userService.getCuratorGroups(userId);
+        return groups.stream()
+                .map(GroupResponse::fromEntity) // нужно будет создать GroupResponse DTO
+                .collect(Collectors.toList());
     }
 }
