@@ -6,6 +6,7 @@ import ru.without_title.queue_project.database.entities.User;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
@@ -15,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     // Проверить, существует ли email
     boolean existsByEmail(String email);
+
+    List<User> findAll();
 }
