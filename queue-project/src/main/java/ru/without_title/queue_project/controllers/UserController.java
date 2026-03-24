@@ -10,6 +10,7 @@ import ru.without_title.queue_project.database.entities.User;
 import ru.without_title.queue_project.services.UserService;
 
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -41,5 +42,14 @@ public class UserController {
     public UserResponse getUserById(@PathVariable UUID userId) {
         User user = userService.getUserById(userId);
         return UserResponse.fromEntity(user);
+    }
+
+    // --------------------- Получение всех пользователей ---------------------
+    @GetMapping()
+    public List<UserResponse> getAllUsers() {
+        return userService.getAllUsers()
+                .stream()
+                .map(UserResponse::fromEntity)
+                .toList();
     }
 }
