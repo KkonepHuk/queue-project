@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "group_members", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"group_id", "user_id"})
+        @UniqueConstraint(columnNames = { "group_id", "user_id" })
 })
 public class GroupMember {
 
@@ -34,5 +34,46 @@ public class GroupMember {
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt;
 
-    public GroupMember() {}
+    public GroupMember() {
+    }
+
+    // Конструктор для удобства
+    public GroupMember(Group group, User user, GroupRole role) {
+        this.group = group;
+        this.user = user;
+        this.role = role;
+    }
+
+    // Геттеры и сеттеры
+    public UUID getGroupMemberId() {
+        return groupMemberId;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public GroupRole getRole() {
+        return role;
+    }
+
+    public void setRole(GroupRole role) {
+        this.role = role;
+    }
+
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
+    }
 }

@@ -1,22 +1,49 @@
 package ru.without_title.queue_project.dto.request;
 
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.UUID;
+
 public class UserRegistrationRequest {
 
+    @NotBlank(message = "Email обязателен")
+    @Email(message = "Некорректный формат email")
     private String email;
-    private String password;
-    private String firstName;
-    private String lastName;
-    private String phone;
 
+    @NotBlank(message = "Пароль обязателен")
+    @Size(min = 6, message = "Пароль должен содержать минимум 6 символов")
+    private String password;
+
+    @NotBlank(message = "Имя обязательно")
+    private String firstName;
+
+    @NotBlank(message = "Фамилия обязательна")
+    private String lastName;
+
+    @NotNull(message = "Тип регистрации обязателен")
+    private RegistrationType registrationType;
+
+    private List<UUID> selectedGroupIds;
+
+    public enum RegistrationType {
+        USER,
+        CURATOR
+    }
+
+    // Конструкторы, геттеры и сеттеры...
     public UserRegistrationRequest() {
     }
 
-    public UserRegistrationRequest(String email, String password, String firstName, String lastName, String phone) {
+    public UserRegistrationRequest(String email, String password, String firstName,
+            String lastName,
+            RegistrationType registrationType,
+            List<UUID> selectedGroupIds) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.phone = phone;
+        this.registrationType = registrationType;
+        this.selectedGroupIds = selectedGroupIds;
     }
 
     public String getEmail() {
@@ -51,11 +78,19 @@ public class UserRegistrationRequest {
         this.lastName = lastName;
     }
 
-    public String getPhone() {
-        return phone;
+    public RegistrationType getRegistrationType() {
+        return registrationType;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setRegistrationType(RegistrationType registrationType) {
+        this.registrationType = registrationType;
+    }
+
+    public List<UUID> getSelectedGroupIds() {
+        return selectedGroupIds;
+    }
+
+    public void setSelectedGroupIds(List<UUID> selectedGroupIds) {
+        this.selectedGroupIds = selectedGroupIds;
     }
 }

@@ -9,6 +9,8 @@ import ru.without_title.queue_project.dto.response.UserResponse;
 import ru.without_title.queue_project.database.entities.User;
 import ru.without_title.queue_project.services.UserService;
 
+import ru.without_title.queue_project.dto.response.GroupResponse;
+import ru.without_title.queue_project.dto.response.GroupForCuratorResponse;
 import java.util.UUID;
 import java.util.List;
 
@@ -20,6 +22,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    // Получить группы, которым нужны кураторы
+    @GetMapping("/groups-needing-curators")
+    public List<GroupForCuratorResponse> getGroupsNeedingCurators() {
+        return userService.getGroupsNeedingCurators();
     }
 
     // --------------------- Регистрация ---------------------
