@@ -12,7 +12,9 @@ import ru.without_title.queue_project.services.UserService;
 import ru.without_title.queue_project.dto.response.GroupResponse;
 import ru.without_title.queue_project.dto.response.GroupForCuratorResponse;
 import java.util.UUID;
+import ru.without_title.queue_project.database.entities.Group;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -52,12 +54,12 @@ public class UserController {
         return UserResponse.fromEntity(user);
     }
 
-    // --------------------- Получение всех пользователей ---------------------
-    @GetMapping()
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers()
-                .stream()
-                .map(UserResponse::fromEntity)
-                .toList();
+    // Получить группы, которые курирует пользователь
+    @GetMapping("/{userId}/curator-groups")
+    public List<GroupResponse> getCuratorGroups(@PathVariable UUID userId) {
+        List<Group> groups = userService.getCuratorGroups(userId);
+        return groups.stream()
+                .map(GroupResponse::fromEntity) // нужно будет создать GroupResponse DTO
+                .collect(Collectors.toList());
     }
 }
