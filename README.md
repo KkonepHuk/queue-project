@@ -44,6 +44,7 @@ docker ps
 docker compose down -v
 ```
 
+
 ---
 
 ## 🔹 Запуск Spring Boot приложения
@@ -141,3 +142,9 @@ SELECT * FROM users;
 - Перед первым запуском убедись, что **порт 5433 свободен**.
 - Если база не создаётся — проверь **переменные окружения в `docker-compose.yml`**.
 - Для тестирования API удобно использовать **Postman**.
+
+---
+
+# Tasks
+
+On this page you can see some tasks allocated (of course, we WILL discuss them in our chat): [tasks](https://git.cloud.mephi.ru/c24-702/queue-project/blob/srpnsk/tasks.md)

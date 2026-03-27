@@ -29,18 +29,5 @@ public class Group {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Group() {
-    }
-
-    public UUID getGroupId() {
-        return groupId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+    public Group() {}
 }

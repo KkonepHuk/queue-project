@@ -1,8 +1,9 @@
--- CREATE TYPE queue_status AS ENUM ('WAITING', 'PASSED', 'SKIPPED');
--- CREATE TYPE notification_status AS ENUM ('PENDING', 'SENT', 'READ');
--- CREATE TYPE notification_type AS ENUM ('SYSTEM', 'QUEUE');
--- CREATE TYPE system_role AS ENUM ('SYSTEM_ADMIN', 'USER');
--- CREATE TYPE group_role AS ENUM ('OWNER', 'MODERATOR', 'MEMBER');
+--TODO: Изменить Enum на Varchar с проверкой
+CREATE TYPE queue_status AS ENUM ('WAITING', 'PASSED', 'SKIPPED');
+CREATE TYPE notification_status AS ENUM ('PENDING', 'SENT', 'READ');
+CREATE TYPE notification_type AS ENUM ('SYSTEM', 'QUEUE');
+CREATE TYPE system_role AS ENUM ('SYSTEM_ADMIN', 'USER');
+CREATE TYPE group_role AS ENUM ('OWNER', 'MODERATOR', 'MEMBER');
 
 
 --Таблица users
@@ -31,7 +32,7 @@ CREATE TABLE group_members (
     group_member_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID NOT NULL REFERENCES groups(group_id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    role VARCHAR(20) DEFAULT 'MEMBER' CHECK (role IN ('OWNER', 'MODERATOR', 'MEMBER')) NOT NULL,
+    role group_role NOT NULL,
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (group_id, user_id)
 );
@@ -58,7 +59,7 @@ CREATE TABLE queue_entries (
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     position INTEGER NOT NULL CHECK (position >= 1),
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'WAITING' CHECK (role IN ('WAITING', 'PASSED', 'SKIPPED')) NOT NULL,
+    status queue_status NOT NULL DEFAULT 'WAITING',
     UNIQUE (queue_id, user_id),
     UNIQUE (queue_id, position)
 );
@@ -68,10 +69,10 @@ CREATE TABLE notifications (
     notification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     queue_id UUID NOT NULL REFERENCES queues(queue_id) ON DELETE CASCADE,
-    type VARCHAR(20) CHECK (role IN ('SYSTEM', 'QUEUE')) NOT NULL,
+    type notification_type NOT NULL,
     message TEXT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     sent_at TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'PENDING' CHECK (role IN ('PENDING', 'SENT', 'READ')) NOT NULL,
+    status notification_status NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
