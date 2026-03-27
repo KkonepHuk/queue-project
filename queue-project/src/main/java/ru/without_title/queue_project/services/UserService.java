@@ -8,6 +8,7 @@ import ru.without_title.queue_project.dto.request.UserRegistrationRequest;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -58,5 +59,10 @@ public class UserService {
     public User getUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // --------------------- Получение всех пользователей ---------------------
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
 }
