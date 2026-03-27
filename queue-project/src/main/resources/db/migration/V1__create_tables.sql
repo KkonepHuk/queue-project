@@ -58,7 +58,7 @@ CREATE TABLE queue_entries (
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     position INTEGER NOT NULL CHECK (position >= 1),
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'WAITING' CHECK (role IN ('WAITING', 'PASSED', 'SKIPPED')) NOT NULL,
+    status VARCHAR(20) DEFAULT 'WAITING' CHECK (status IN ('WAITING', 'PASSED', 'SKIPPED')) NOT NULL,
     UNIQUE (queue_id, user_id),
     UNIQUE (queue_id, position)
 );
@@ -68,10 +68,10 @@ CREATE TABLE notifications (
     notification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     queue_id UUID NOT NULL REFERENCES queues(queue_id) ON DELETE CASCADE,
-    type VARCHAR(20) CHECK (role IN ('SYSTEM', 'QUEUE')) NOT NULL,
+    type VARCHAR(20) CHECK (type IN ('SYSTEM', 'QUEUE')) NOT NULL,
     message TEXT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     sent_at TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'PENDING' CHECK (role IN ('PENDING', 'SENT', 'READ')) NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'SENT', 'READ')) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
