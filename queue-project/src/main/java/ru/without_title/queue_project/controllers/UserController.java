@@ -9,7 +9,12 @@ import ru.without_title.queue_project.dto.response.UserResponse;
 import ru.without_title.queue_project.database.entities.User;
 import ru.without_title.queue_project.services.UserService;
 
+import ru.without_title.queue_project.dto.response.GroupResponse;
+import ru.without_title.queue_project.dto.response.GroupForCuratorResponse;
 import java.util.UUID;
+import ru.without_title.queue_project.database.entities.Group;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,6 +24,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    // Получить группы, которым нужны кураторы
+    @GetMapping("/groups-needing-curators")
+    public List<GroupForCuratorResponse> getGroupsNeedingCurators() {
+        return userService.getGroupsNeedingCurators();
     }
 
     // --------------------- Регистрация ---------------------
@@ -41,5 +52,14 @@ public class UserController {
     public UserResponse getUserById(@PathVariable UUID userId) {
         User user = userService.getUserById(userId);
         return UserResponse.fromEntity(user);
+    }
+
+    // Получить группы, которые курирует пользователь
+    @GetMapping("/{userId}/curator-groups")
+    public List<GroupResponse> getCuratorGroups(@PathVariable UUID userId) {
+        List<Group> groups = userService.getCuratorGroups(userId);
+        return groups.stream()
+                .map(GroupResponse::fromEntity) // нужно будет создать GroupResponse DTO
+                .collect(Collectors.toList());
     }
 }
