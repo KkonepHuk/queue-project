@@ -17,7 +17,7 @@ import ru.without_title.queue_project.dto.response.GroupForCuratorResponse;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -132,14 +132,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    /**
-     * Получить все группы, которые курирует пользователь
-     */
-    public List<Group> getCuratorGroups(UUID userId) {
-        User user = getUserById(userId);
-        return groupMemberRepository.findCuratorGroups(user)
-                .stream()
-                .map(GroupMember::getGroup)
-                .collect(Collectors.toList());
+    // --------------------- Получение всех пользователей ---------------------
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
 }
