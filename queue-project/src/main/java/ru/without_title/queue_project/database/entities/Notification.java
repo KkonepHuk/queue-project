@@ -46,5 +46,42 @@ public class Notification {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Notification() {}
+    public Notification() {
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Queue getQueue() {
+        return queue;
+    }
+
+    public NotificationStatus getStatus() {
+        return status;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public UUID getNotificationId() {
+        return notificationId;
+    }
+
+    public LocalDateTime getScheduledAt() {
+        return scheduledAt;
+    }
+
+    public LocalDateTime getSentAt() {
+        return sentAt;
+    }
+
+    public NotificationType getType() {
+        return type;
+    }
 }
