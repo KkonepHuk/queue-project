@@ -9,8 +9,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "queue_entries", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"queue_id", "user_id"}),
-        @UniqueConstraint(columnNames = {"queue_id", "position"})
+        @UniqueConstraint(columnNames = { "queue_id", "user_id" }),
+        @UniqueConstraint(columnNames = { "queue_id", "position" })
 })
 public class QueueEntry {
 
@@ -38,5 +38,30 @@ public class QueueEntry {
     @Column(nullable = false)
     private QueueStatus status;
 
-    public QueueEntry() {}
+    public QueueEntry() {
+    }
+
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public UUID getQueueEntryId() {
+        return queueEntryId;
+    }
+
+    public Queue getQueue() {
+        return queue;
+    }
+
+    public QueueStatus getStatus() {
+        return status;
+    }
+
+    public User getUser() {
+        return user;
+    }
 }
