@@ -29,5 +29,26 @@ public class Group {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Group() {}
+    public Group() {
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public UUID getGroupId() {
+        return groupId;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

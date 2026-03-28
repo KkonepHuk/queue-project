@@ -48,5 +48,50 @@ public class Queue {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Queue() {}
+    public Queue() {
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDateTime getEventDate() {
+        return eventDate;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public Integer getMaxSize() {
+        return maxSize;
+    }
+
+    public UUID getQueueId() {
+        return queueId;
+    }
+
+    public LocalDateTime getRegClose() {
+        return regClose;
+    }
+
+    public LocalDateTime getRegOpen() {
+        return regOpen;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public boolean getIsActive() {
+        return isActive;
+    }
 }
