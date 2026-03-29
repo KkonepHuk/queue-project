@@ -2,6 +2,7 @@ package ru.without_title.queue_project.database.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 import ru.without_title.queue_project.database.entities.enums.QueueStatus;
 
 import java.time.LocalDateTime;
@@ -45,23 +46,47 @@ public class QueueEntry {
         return joinedAt;
     }
 
+    public void setJoinedAt(LocalDateTime joinedAt) {
+        this.joinedAt = joinedAt;
+    }
+
     public Integer getPosition() {
         return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 
     public UUID getQueueEntryId() {
         return queueEntryId;
     }
 
+    public void setQueueEntryId(UUID queueEntryId) {
+        this.queueEntryId = queueEntryId;
+    }
+
     public Queue getQueue() {
         return queue;
+    }
+
+    public void setQueue(Queue queue) {
+        this.queue = queue;
     }
 
     public QueueStatus getStatus() {
         return status;
     }
 
+    public void setStatus(QueueStatus status) {
+        this.status = status;
+    }
+
     public User getUser() {
         return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -23,8 +23,6 @@ public class QueueEntryController {
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void joinQueue(@PathVariable UUID queueId) {
-        // Пока userId не из Security, можно временно добавить его в параметры
-        // или оставить TODO до настройки Spring Security
         entryService.joinQueue(queueId);
     }
 
