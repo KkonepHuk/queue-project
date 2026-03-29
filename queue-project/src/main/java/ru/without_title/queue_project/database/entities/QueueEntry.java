@@ -2,6 +2,7 @@ package ru.without_title.queue_project.database.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 import ru.without_title.queue_project.database.entities.enums.QueueStatus;
 
 import java.time.LocalDateTime;
@@ -9,8 +10,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "queue_entries", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"queue_id", "user_id"}),
-        @UniqueConstraint(columnNames = {"queue_id", "position"})
+        @UniqueConstraint(columnNames = { "queue_id", "user_id" }),
+        @UniqueConstraint(columnNames = { "queue_id", "position" })
 })
 public class QueueEntry {
 
@@ -38,5 +39,54 @@ public class QueueEntry {
     @Column(nullable = false)
     private QueueStatus status;
 
-    public QueueEntry() {}
+    public QueueEntry() {
+    }
+
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
+    }
+
+    public void setJoinedAt(LocalDateTime joinedAt) {
+        this.joinedAt = joinedAt;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
+
+    public UUID getQueueEntryId() {
+        return queueEntryId;
+    }
+
+    public void setQueueEntryId(UUID queueEntryId) {
+        this.queueEntryId = queueEntryId;
+    }
+
+    public Queue getQueue() {
+        return queue;
+    }
+
+    public void setQueue(Queue queue) {
+        this.queue = queue;
+    }
+
+    public QueueStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(QueueStatus status) {
+        this.status = status;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
