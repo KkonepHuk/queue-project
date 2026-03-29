@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.dto.request.UserLoginRequest;
 import ru.without_title.queue_project.dto.request.UserRegistrationRequest;
+import ru.without_title.queue_project.dto.request.UserUpdateRequest;
 import ru.without_title.queue_project.dto.response.UserLoginResponse;
 import ru.without_title.queue_project.dto.response.UserResponse;
 import ru.without_title.queue_project.database.entities.User;
@@ -20,6 +21,15 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    // --------------------- Получение всех пользователей ---------------------
+    @GetMapping()
+    public List<UserResponse> getAllUsers() {
+        return userService.getAllUsers()
+                .stream()
+                .map(UserResponse::fromEntity)
+                .toList();
     }
 
     // --------------------- Регистрация ---------------------
@@ -44,12 +54,22 @@ public class UserController {
         return UserResponse.fromEntity(user);
     }
 
-    // --------------------- Получение всех пользователей ---------------------
-    @GetMapping()
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers()
-                .stream()
-                .map(UserResponse::fromEntity)
-                .toList();
+    // --------------------- Обновление данных пользователя ---------------------
+    @PatchMapping("/{userId}")
+    public UserResponse updateUser(
+            @PathVariable UUID userId,
+            @RequestBody UserUpdateRequest request
+    ) {
+        User updatedUser = userService.updateUser(userId, request);
+        return UserResponse.fromEntity(updatedUser);
+    }
+
+    // --------------------- Деактивация пользователя ---------------------
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deactivateUser(
+            @PathVariable UUID userId
+    ) {
+        userService.deactivateUser(userId);
     }
 }

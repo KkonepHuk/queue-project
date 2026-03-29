@@ -1,10 +1,12 @@
 package ru.without_title.queue_project.services;
 
 import org.springframework.stereotype.Service;
+import ru.without_title.queue_project.database.entities.GroupMember;
 import ru.without_title.queue_project.database.entities.User;
 import ru.without_title.queue_project.database.entities.enums.SystemRole;
 import ru.without_title.queue_project.database.dao.UserRepository;
 import ru.without_title.queue_project.dto.request.UserRegistrationRequest;
+import ru.without_title.queue_project.dto.request.UserUpdateRequest;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -64,5 +66,28 @@ public class UserService {
     // --------------------- Получение всех пользователей ---------------------
     public List<User> getAllUsers(){
         return userRepository.findAll();
+    }
+
+    // --------------------- Обновление данных пользователя ---------------------
+    public User updateUser(UUID userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+
+        return userRepository.save(user);
+    }
+
+    // --------------------- Деактивация пользователя ---------------------
+    public void deactivateUser(UUID userId) {
+
+        User user = getUserById(userId);
+        user.setActive(false);
+        userRepository.save(user);
     }
 }
