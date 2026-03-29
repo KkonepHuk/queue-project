@@ -55,43 +55,87 @@ public class Queue {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public User getCreatedBy() {
         return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
     }
 
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public LocalDateTime getEventDate() {
         return eventDate;
+    }
+
+    public void setEventDate(LocalDateTime eventDate) {
+        this.eventDate = eventDate;
     }
 
     public Group getGroup() {
         return group;
     }
 
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
     public Integer getMaxSize() {
         return maxSize;
+    }
+
+    public void setMaxSize(Integer maxSize) {
+        this.maxSize = maxSize;
     }
 
     public UUID getQueueId() {
         return queueId;
     }
 
+    public void setQueueId(UUID queueId) {
+        this.queueId = queueId;
+    }
+
     public LocalDateTime getRegClose() {
         return regClose;
+    }
+
+    public void setRegClose(LocalDateTime regClose) {
+        this.regClose = regClose;
     }
 
     public LocalDateTime getRegOpen() {
         return regOpen;
     }
 
+    public void setRegOpen(LocalDateTime regOpen) {
+        this.regOpen = regOpen;
+    }
+
     public String getTitle() {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public boolean getIsActive() {
         return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }
