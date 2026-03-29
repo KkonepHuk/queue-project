@@ -35,4 +35,24 @@ public class GroupMember {
     private LocalDateTime joinedAt;
 
     public GroupMember() {}
+
+    public UUID getGroupMemberId() { return groupMemberId; }
+
+    public void setGroupMemberId(UUID groupMemberId) { this.groupMemberId = groupMemberId; }
+
+    public UUID getGroupId() { return group.getGroupId(); }
+
+    public void setGroup(Group group) { this.group = group; }
+
+    public UUID getUserId() { return user.getUserId(); }
+
+    public void setUser(User user) { this.user = user; }
+
+    public GroupRole getRole() { return role; }
+
+    public void setRole(GroupRole role) { this.role = role; }
+
+    public LocalDateTime getJoinedAt() { return joinedAt; }
+
+    public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
 }
