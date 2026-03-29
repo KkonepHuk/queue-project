@@ -11,9 +11,5 @@ import ru.without_title.queue_project.database.entities.Group;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, UUID> {
-    // Найти все активные группы
-    List<Group> findByIsActiveTrue();
 
-    // Найти группу по ID (только активные)
-    Optional<Group> findByGroupIdAndIsActiveTrue(UUID groupId);
 }
