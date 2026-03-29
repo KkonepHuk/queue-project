@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: queue-project
+  datasource:
+    url: jdbc:postgresql://localhost:5433/queue_db
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
