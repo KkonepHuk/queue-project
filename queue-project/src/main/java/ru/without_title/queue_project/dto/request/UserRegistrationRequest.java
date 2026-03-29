@@ -6,7 +6,6 @@ public class UserRegistrationRequest {
     private String password;
     private String firstName;
     private String lastName;
-    private String phone;
 
     public UserRegistrationRequest() {
     }
@@ -16,7 +15,6 @@ public class UserRegistrationRequest {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.phone = phone;
     }
 
     public String getEmail() {
@@ -49,13 +47,5 @@ public class UserRegistrationRequest {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 }
