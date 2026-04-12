@@ -48,16 +48,16 @@ public class GroupController {
     @PutMapping("/{groupId}")
     public GroupResponse updateGroup(
             @PathVariable UUID groupId,
-            @RequestBody GroupCreateRequest request
-    ) {
+            @RequestBody GroupCreateRequest request) {
         Group group = groupService.updateGroup(groupId, request);
         return GroupResponse.fromEntity(group);
     }
 
     // --------------------- Удаление группы ---------------------
-    @DeleteMapping("/{groupId}")
+    @DeleteMapping("/groups/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGroup(@PathVariable UUID groupId) {
-        groupService.deleteGroup(groupId);
+    public void deleteGroup(@PathVariable UUID groupId, @RequestParam UUID userId) {
+        // В будущем userId будет браться автоматически из заголовка/токена
+        groupService.deleteGroup(groupId, userId);
     }
 }

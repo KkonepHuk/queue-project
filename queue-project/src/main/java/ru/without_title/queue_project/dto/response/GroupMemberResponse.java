@@ -1,6 +1,6 @@
 package ru.without_title.queue_project.dto.response;
 
-import ru.without_title.queue_project.database.entities.Group;
+// import ru.without_title.queue_project.database.entities.Group;
 import ru.without_title.queue_project.database.entities.GroupMember;
 import ru.without_title.queue_project.database.entities.enums.GroupRole;
 
@@ -16,28 +16,51 @@ public class GroupMemberResponse {
 
     public GroupMemberResponse(UUID groupMemberId, UUID groupId, UUID userId, GroupRole role, LocalDateTime joinedAt) {
         this.groupMemberId = groupMemberId;
+        this.groupId = groupId;
         this.userId = userId;
         this.role = role;
         this.joinedAt = joinedAt;
     }
 
+    public UUID getGroupMemberId() {
+        return groupMemberId;
+    }
 
-    public UUID getGroupMemberId() { return groupMemberId; }
+    public void setGroupMemberId(UUID groupMemberId) {
+        this.groupMemberId = groupMemberId;
+    }
 
-    public void setGroupMemberId(UUID groupId) { this.groupMemberId = groupMemberId; }
+    public void setGroupId(UUID groupId) {
+        this.groupId = groupId;
+    }
 
-    public UUID getUserId() { return userId; }
+    public UUID getGroupId() {
+        return groupId;
+    }
 
-    public void setUserId(UUID userId) { this.userId = userId; }
+    public UUID getUserId() {
+        return userId;
+    }
 
-    public GroupRole getRole() { return role; }
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
 
-    public void setRole(GroupRole role) { this.role = role; }
+    public GroupRole getRole() {
+        return role;
+    }
 
-    public LocalDateTime getJoinedAt() { return joinedAt; }
+    public void setRole(GroupRole role) {
+        this.role = role;
+    }
 
-    public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
+    }
 
+    public void setJoinedAt(LocalDateTime joinedAt) {
+        this.joinedAt = joinedAt;
+    }
 
     public static GroupMemberResponse fromEntity(GroupMember groupMember) {
         return new GroupMemberResponse(
@@ -45,7 +68,6 @@ public class GroupMemberResponse {
                 groupMember.getGroupId(),
                 groupMember.getUserId(),
                 groupMember.getRole(),
-                groupMember.getJoinedAt()
-        );
+                groupMember.getJoinedAt());
     }
 }
