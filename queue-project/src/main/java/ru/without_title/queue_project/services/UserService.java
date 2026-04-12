@@ -1,7 +1,7 @@
 package ru.without_title.queue_project.services;
 
 import org.springframework.stereotype.Service;
-import ru.without_title.queue_project.database.entities.GroupMember;
+// import ru.without_title.queue_project.database.entities.GroupMember;
 import ru.without_title.queue_project.database.entities.User;
 import ru.without_title.queue_project.database.entities.enums.SystemRole;
 import ru.without_title.queue_project.database.dao.UserRepository;
@@ -64,7 +64,7 @@ public class UserService {
     }
 
     // --------------------- Получение всех пользователей ---------------------
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
