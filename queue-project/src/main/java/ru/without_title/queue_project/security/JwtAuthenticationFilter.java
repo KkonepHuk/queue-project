@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.without_title.queue_project.config.JwtConfig;
+import ru.without_title.queue_project.database.entities.enums.SystemRole;
 
 
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 String email = jwtTokenUtil.getEmailFromToken(token);
                 Long userId = jwtTokenUtil.getUserIdFromToken(token);
-                Role role = jwtTokenUtil.getRoleFromToken(token);
+                SystemRole role = jwtTokenUtil.getRoleFromToken(token);
 
                 List<SimpleGrantedAuthority> authorities =
                         List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

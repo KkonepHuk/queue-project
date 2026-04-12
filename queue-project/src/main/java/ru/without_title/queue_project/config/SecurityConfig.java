@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import ru.underfish.app.security.JwtAuthenticationFilter;
+import ru.without_title.queue_project.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
