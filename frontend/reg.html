@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reg | QQueue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <form class="form" id="regForm">
+        <div class="title">Create Account</div>
+
+        <label id="firstName">
+            <input type="text" autocomplete="given-name" required>
+            <span>First Name</span>
+        </label>
+
+        <label id="lastName">
+            <input type="text" autocomplete="family-name" required>
+            <span>Last Name</span>
+        </label>
+
+        <label id="email">
+            <input type="email" autocomplete="email" required>
+            <span>Email</span>
+        </label>
+
+        <label id="password">
+            <input type="password" autocomplete="new-password" required>
+            <span>Password (min 8)</span>
+        </label>
+
+        <label id="confirmPassword">
+            <input type="password" autocomplete="new-password" required>
+            <span>Confirm Password</span>
+        </label>
+
+        <div class="input-error"></div>
+        <button type="submit" class="button disable">Register</button>
+    </form>
+
+    <script type="module" src="js/register.js"></script>
+</body>
+</html>
