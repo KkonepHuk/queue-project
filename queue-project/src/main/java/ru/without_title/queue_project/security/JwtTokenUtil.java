@@ -10,6 +10,7 @@ import ru.without_title.queue_project.database.entities.enums.SystemRole;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenUtil {
@@ -30,7 +31,7 @@ public class JwtTokenUtil {
     }
 
     // Генерация токена
-    public String generateToken(Long userId, String email, SystemRole role) {
+    public String generateToken(UUID userId, String email, SystemRole role) {
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
@@ -66,9 +67,9 @@ public class JwtTokenUtil {
     }
 
     // Извлечение userId
-    public Long getUserIdFromToken(String token) {
-        Number userId = getClaims(token).get("userId", Number.class);
-        return userId.longValue();
+    public UUID getUserIdFromToken(String token) {
+        String userId = getClaims(token).get("userId", String.class);
+        return UUID.fromString(userId);
     }
 
     // Извлечение роли

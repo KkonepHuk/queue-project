@@ -17,6 +17,7 @@ import ru.without_title.queue_project.database.entities.enums.SystemRole;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -49,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtTokenUtil.validateToken(token)) {
 
                 String email = jwtTokenUtil.getEmailFromToken(token);
-                Long userId = jwtTokenUtil.getUserIdFromToken(token);
+                UUID userId = jwtTokenUtil.getUserIdFromToken(token);
                 SystemRole role = jwtTokenUtil.getRoleFromToken(token);
 
                 List<SimpleGrantedAuthority> authorities =

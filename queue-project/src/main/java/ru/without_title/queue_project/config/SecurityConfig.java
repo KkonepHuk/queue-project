@@ -4,6 +4,7 @@ package ru.without_title.queue_project.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,7 +30,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("!test")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -37,27 +37,47 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/users/register").permitAll()
-                        .requestMatchers("/api/v1/users/login").permitAll()
-                        .requestMatchers("/api/v1/users/{userId}").hasRole("ADMIN")
-                        .anyRequest().hasRole("USER")
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                                .requestMatchers("/api/v1/users/register").permitAll()
+                                .requestMatchers("/api/v1/users/login").permitAll()
+                                // USER endpoints
+                                .requestMatchers("/api/v1/users/me/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/v1/notifications/**").hasAnyRole("USER", "ADMIN")
 
-        return http.build();
-    }
+                                // GROUPS
+                                // просмотр групп
+                                .requestMatchers(HttpMethod.GET, "/api/v1/groups/**").hasAnyRole("USER", "ADMIN")
+                                // создание группы
+                                .requestMatchers(HttpMethod.POST, "/api/v1/groups").hasAnyRole("USER", "ADMIN")
+                                // изменение/удаление группы
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/groups/**").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/**").hasAnyRole("ADMIN")
 
-    @Bean
-    @Profile("test")
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/users/register").permitAll()
-                        .requestMatchers("/api/v1/users/login").permitAll()
-                        .requestMatchers("/api/v1/users/{userId}").hasRole("USER")
-                        .anyRequest().permitAll()
+                                // GROUP MEMBERS
+                                // просмотр участников
+                                .requestMatchers(HttpMethod.GET, "/api/v1/groups/*/members").hasAnyRole("USER", "ADMIN")
+                                // управление участниками
+                                .requestMatchers("/api/v1/groups/*/members/**").hasAnyRole("ADMIN")
+                                // QUEUES
+                                // просмотр очередей
+                                .requestMatchers(HttpMethod.GET, "/api/v1/groups/*/queues").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/queues/**").hasAnyRole("USER", "ADMIN")
+                                // создание очереди
+                                .requestMatchers(HttpMethod.POST, "/api/v1/groups/*/queues").hasAnyRole("USER", "ADMIN")
+                                // изменение/удаление очереди
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/queues/**").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/queues/**").hasAnyRole("ADMIN")
+
+                                // QUEUE ACTIONS
+                                // вход/выход из очереди
+                                .requestMatchers("/api/v1/queues/*/join").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/api/v1/queues/*/leave").hasAnyRole("USER", "ADMIN")
+                                // просмотр записей очереди
+                                .requestMatchers(HttpMethod.GET, "/api/v1/queues/*/entries").hasAnyRole("USER", "ADMIN")
+                                // изменение статуса записи
+                                .requestMatchers("/api/v1/queues/*/entries/**").hasAnyRole("ADMIN")
+
+                                // DEFAULT
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
