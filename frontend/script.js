@@ -1,3 +1,4 @@
+import { Api } from './js/api.js';
 const API_URL = 'http://localhost:8080/api/v1'; 
 const USE_MOCK = true;
 
@@ -44,8 +45,8 @@ function handleInput(e, name) {
 async function handleLogin() {
     const email = emailInput.value;
     const password = passwordInput.value;
-
     const reg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
     if (!reg.test(email)) {
         showError('invalid email');
         return;
@@ -53,32 +54,15 @@ async function handleLogin() {
 
     form.button.classList.add('disable');
     form.button.textContent = 'entry...';
-    hideError();
 
     try {
-        if (USE_MOCK) {
-            await new Promise(resolve => setTimeout(resolve, 800)); // Задержка 0.8 сек
-            
-            // Имитация успеха
-            sessionStorage.setItem('authToken', 'mock-token-12345');
-            window.location.href = '/dashboard.html'; 
-        } else {
-            const response = await fetch(`${API_URL}/users/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
-            const data = await response.json();
-            
-            sessionStorage.setItem('authToken', data.token);
-            window.location.href = '/dashboard.html';
-        }
+        const response = await Api.login({ email, password });
+        
+        sessionStorage.setItem('authToken', response.token);
+        window.location.href = '/dashboard.html'; 
 
     } catch (error) {
-        console.error(error);
-        showError(error.message || 'invalid login or password');
+        showError(error.message || 'Login failed');
         form.button.classList.remove('disable');
         form.button.textContent = 'Log in';
     }
