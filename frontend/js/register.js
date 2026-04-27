@@ -13,7 +13,7 @@ const inputs = {
     confirm: form.querySelector('#confirmPassword input')
 };
 
-//плавающие лейблы + активация кнопки
+// Плавающие лейблы + активация кнопки
 Object.values(inputs).forEach(input => {
     const updateField = () => {
         input.closest('label').classList.toggle('filled', input.value.trim() !== '');
@@ -51,6 +51,7 @@ form.addEventListener('submit', async (e) => {
     const firstName = inputs.firstName.value.trim();
     const lastName = inputs.lastName.value.trim();
 
+    // Клиентская валидация
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) return showError('Invalid email format');
     if (pass.length < 8) return showError('Password must be at least 8 characters');
@@ -79,7 +80,7 @@ form.addEventListener('submit', async (e) => {
             }
         }
 
-        // успех -> флаг для логина -> редирект
+        // Успех -> флаг для логина + редирект
         sessionStorage.setItem('regSuccess', 'true');
         window.location.href = '/index.html';
     } catch (error) {
