@@ -16,41 +16,33 @@ import java.util.UUID;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(QueueController.class)
-class QueueControllerTest {
+@WebMvcTest(QueueEntryController.class)
+class QueueEntryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private QueueService queueService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private QueueEntryService entryService;
 
     @Test
-    void shouldCreateQueue() throws Exception {
-        UUID groupId = UUID.randomUUID();
-        // Твой record QueueRequest
-        QueueRequest request = new QueueRequest(
-                "Зачет по БД",
-                "Очередь в 405 кабинет",
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusHours(5),
-                30);
+    void shouldJoinQueue() throws Exception {
+        UUID queueId = UUID.randomUUID();
 
-        when(queueService.createQueue(eq(groupId), any(QueueRequest.class))).thenReturn(new Queue());
+        // void методы в Mockito по умолчанию ничего не делают,
+        // но мы можем явно это указать (необязательно)
+        doNothing().when(entryService).joinQueue(eq(queueId));
 
-        mockMvc.perform(post("/api/v1/groups/{groupId}/queues", groupId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/v1/queues/{queueId}/join", queueId))
+                .andExpect(status().isNoContent());
+
+        // Проверяем, что метод сервиса реально вызвался
+        verify(entryService, times(1)).joinQueue(queueId);
     }
 }

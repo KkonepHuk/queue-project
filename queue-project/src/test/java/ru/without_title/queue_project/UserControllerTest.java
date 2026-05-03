@@ -22,35 +22,35 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(QueueController.class)
-class QueueControllerTest {
+@WebMvcTest(UserController.class)
+class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private QueueService queueService;
+    private UserService userService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
-    void shouldCreateQueue() throws Exception {
-        UUID groupId = UUID.randomUUID();
-        // Твой record QueueRequest
-        QueueRequest request = new QueueRequest(
-                "Зачет по БД",
-                "Очередь в 405 кабинет",
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusHours(5),
-                30);
+    void shouldRegisterUser() throws Exception {
+        UserRegistrationRequest request = new UserRegistrationRequest(
+                "test@mail.ru", "password123", "Иван", "Иванов", "88005553535");
 
-        when(queueService.createQueue(eq(groupId), any(QueueRequest.class))).thenReturn(new Queue());
+        // Предположим, сервис возвращает созданного юзера с ID
+        User savedUser = new User();
+        savedUser.setUserId(UUID.randomUUID());
+        savedUser.setEmail(request.getEmail());
 
-        mockMvc.perform(post("/api/v1/groups/{groupId}/queues", groupId)
+        when(userService.registerUser(any(UserRegistrationRequest.class))).thenReturn(savedUser);
+
+        mockMvc.perform(post("/api/v1/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value("test@mail.ru"))
+                .andExpect(jsonPath("$.userId").exists());
     }
 }
