@@ -43,8 +43,7 @@ public class UserController {
     // --------------------- Логин ---------------------
     @PostMapping("/login")
     public UserLoginResponse loginUser(@RequestBody UserLoginRequest request) {
-        User user = userService.loginUser(request.getEmail(), request.getPassword());
-        return new UserLoginResponse(user.getUserId(), user.getEmail());
+        return userService.loginUser(request);
     }
 
     // --------------------- Получение пользователя по UUID ---------------------
