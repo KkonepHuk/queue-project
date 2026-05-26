@@ -69,7 +69,7 @@ public class UserService {
     }
 
     // --------------------- Получение всех пользователей ---------------------
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 

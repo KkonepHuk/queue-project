@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>welcome page</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="form">
-        <div class="title">Welcome to Q</div>
+    <form class="form" id="loginForm">
+        <div class="title">Welcome to QApp</div>
+        <div class="input-error" id="regSuccessMsg" style="color: green;"></div>
         <div>
             <label id="email">
-                <input type="text">
+                <input type="email" autocomplete="email">
                 <span>Email</span>
             </label>
             <div class="input-error">invalid email</div>
         </div>
         <label id="password">
-            <input type="password">
+            <input type="password" autocomplete="current-password">
             <span>Password</span>
         </label>
-        <div class="button disable">Log in</div>
-    </div>
+        <div class="form-actions">
+            <button type="submit" class="button primary disable">Log in</button>
+            <a href="reg.html" class="button secondary">Sign Up</a>
+        </div>
+    </form>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

@@ -4,12 +4,22 @@ const USE_MOCK = true;
 const form = {
     emailLabel: document.getElementById('email'),
     passwordLabel: document.getElementById('password'),
-    button: document.querySelector('.button'),
+    button: document.querySelector('.button.primary'),
     error: document.querySelector('.input-error')
 };
 
 const emailInput = form.emailLabel.querySelector('input');
 const passwordInput = form.passwordLabel.querySelector('input');
+
+if (sessionStorage.getItem('regSuccess')) {
+    const successMsg = document.getElementById('regSuccessMsg');
+    if (successMsg) {
+        successMsg.textContent = 'Account created. Log in.';
+        successMsg.style.color = 'green';
+        successMsg.style.display = 'block';
+        sessionStorage.removeItem('regSuccess');
+    }
+}
 
 function checkForm() {
     if (emailInput.value && passwordInput.value) {
@@ -50,7 +60,7 @@ async function handleLogin() {
             await new Promise(resolve => setTimeout(resolve, 800)); // Задержка 0.8 сек
             
             // Имитация успеха
-            localStorage.setItem('authToken', 'mock-token-12345');
+            sessionStorage.setItem('authToken', 'mock-token-12345');
             window.location.href = '/dashboard.html'; 
         } else {
             const response = await fetch(`${API_URL}/users/login`, {
@@ -62,7 +72,7 @@ async function handleLogin() {
             if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
             const data = await response.json();
             
-            localStorage.setItem('authToken', data.token);
+            sessionStorage.setItem('authToken', data.token);
             window.location.href = '/dashboard.html';
         }
 
@@ -87,4 +97,8 @@ function hideError() {
 
 emailInput.oninput = (e) => handleInput(e, 'email');
 passwordInput.oninput = (e) => handleInput(e, 'password');
-form.button.onclick = handleLogin;
+
+document.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleLogin();
+});
