@@ -44,11 +44,13 @@ CREATE TABLE queues (
     description TEXT,
     event_date TIMESTAMP NOT NULL,
     reg_open TIMESTAMP NOT NULL,
-    reg_close TIMESTAMP NOT NULL CHECK (reg_open < reg_close) CHECK (reg_open <= event_date),
+    reg_close TIMESTAMP NOT NULL,
     max_size INTEGER NOT NULL CHECK (max_size > 0),
     is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (reg_open < reg_close),
+    CHECK (reg_open < event_date),
+    CHECK (reg_close <= event_date)
 );
 
 -- Таблица queue_entries
@@ -67,11 +69,13 @@ CREATE TABLE queue_entries (
 CREATE TABLE notifications (
     notification_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    queue_id UUID NOT NULL REFERENCES queues(queue_id) ON DELETE CASCADE,
+    queue_id UUID REFERENCES queues(queue_id) ON DELETE CASCADE,
     type VARCHAR(20) CHECK (type IN ('SYSTEM', 'QUEUE')) NOT NULL,
     message TEXT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     sent_at TIMESTAMP,
     status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'SENT', 'READ')) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK(status = 'PENDING' OR sent_at IS NOT NULL),
+    CHECK((type = 'QUEUE' AND queue_id IS NOT NULL) OR (type = 'SYSTEM' AND queue_id IS NULL))
 );

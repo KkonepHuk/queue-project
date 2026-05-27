@@ -1,6 +1,7 @@
 package ru.without_title.queue_project.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.dto.request.UserLoginRequest;
 import ru.without_title.queue_project.dto.request.UserRegistrationRequest;
@@ -43,8 +44,30 @@ public class UserController {
     // --------------------- Логин ---------------------
     @PostMapping("/login")
     public UserLoginResponse loginUser(@RequestBody UserLoginRequest request) {
-        User user = userService.loginUser(request.getEmail(), request.getPassword());
-        return new UserLoginResponse(user.getUserId(), user.getEmail());
+        return userService.loginUser(request);
+    }
+
+    @GetMapping("/me")
+    public UserResponse getCurrentUser(Authentication authentication) {
+        User user = userService.getUserByEmail(authentication.getName());
+        return UserResponse.fromEntity(user);
+    }
+
+    @PatchMapping("/me")
+    public UserResponse updateCurrentUser(
+            Authentication authentication,
+            @RequestBody UserUpdateRequest request
+    ) {
+        User user = userService.getUserByEmail(authentication.getName());
+        User updatedUser = userService.updateUser(user.getUserId(), request);
+        return UserResponse.fromEntity(updatedUser);
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deactivateCurrentUser(Authentication authentication) {
+        User user = userService.getUserByEmail(authentication.getName());
+        userService.deactivateUser(user.getUserId());
     }
 
     // --------------------- Получение пользователя по UUID ---------------------

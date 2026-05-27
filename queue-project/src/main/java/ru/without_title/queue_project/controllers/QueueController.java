@@ -1,6 +1,7 @@
 package ru.without_title.queue_project.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.dto.request.QueueRequest;
 import ru.without_title.queue_project.dto.response.QueueResponse;
@@ -29,9 +30,11 @@ public class QueueController {
 
     @PostMapping("/groups/{groupId}/queues")
     @ResponseStatus(HttpStatus.CREATED)
-    public QueueResponse createQueue(@PathVariable UUID groupId, @RequestBody QueueRequest request) {
-        // В сервисе передаем groupId, чтобы привязать очередь к группе
-        Queue queue = queueService.createQueue(groupId, request);
+    public QueueResponse createQueue(
+            @PathVariable UUID groupId,
+            @RequestBody QueueRequest request,
+            Authentication authentication) {
+        Queue queue = queueService.createQueue(groupId, request, authentication.getName());
         return QueueResponse.fromEntity(queue);
     }
 
@@ -48,7 +51,17 @@ public class QueueController {
 
     @DeleteMapping("/queues/{queueId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteQueue(@PathVariable UUID queueId) {
-        queueService.deleteQueue(queueId);
+    public void deleteQueue(@PathVariable UUID queueId, Authentication authentication) {
+        boolean isAdmin = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority()));
+        queueService.deleteQueue(queueId, authentication.getName(), isAdmin);
+    }
+
+    @PatchMapping("/queues/{queueId}/close")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void closeQueue(@PathVariable UUID queueId, Authentication authentication) {
+        boolean isAdmin = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority()));
+        queueService.closeQueue(queueId, authentication.getName(), isAdmin);
     }
 }

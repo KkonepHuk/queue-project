@@ -1,0 +1,744 @@
+/* Перебиваем глобальное центрирование body */
+body.dashboard-body {
+    display: grid !important;
+    grid-template-columns: 250px 5fr;
+    height: 100vh;
+    width: 100vw;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    background-color: #f5f7fa;
+}
+
+/* Фикс шапки: имя + аватарка в ряд */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    height: 70px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Держит элементы вместе */
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: #3813bb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ===== Базовая сетка ===== */
+.dashboard-body {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    height: 100vh;
+    background-color: #f5f7fa;
+}
+
+/* ===== Сайдбар ===== */
+.sidebar {
+    background: rgb(103, 68, 130);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: relative;
+    z-index: 10;
+}
+
+.sidebar-header h2 {
+    padding: 0 24px;
+    margin-bottom: 60px;
+    font-size: 40px;
+}
+
+.sidebar-nav {
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.nav-item:hover {
+    background: #8f61a9;
+    color: white;
+}
+
+.nav-item.active {
+    background: #893eb5;
+    color: white;
+}
+
+.nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+.badge {
+    margin-left: auto;
+    background: #6f22db;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #34495e;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 10px;
+    background: #820e01;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: "Montserrat", sans-serif;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+}
+
+/* ===== Основной контент ===== */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.topbar {
+    background: white;
+    padding: 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.topbar h1 {
+    font-size: 24px;
+    color: #2c3e50;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: #5e049a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.content-area {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+}
+
+/* ===== Карточки групп ===== */
+#content .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+#content .group-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    
+}
+
+#content .group-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+#content .group-status {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#content .group-status.open {
+    background: #d5f5e3;
+    color: #27ae60;
+}
+
+#content .group-status.closed {
+    background: #fadbd8;
+    color: #e74c3c;
+}
+
+.group-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 25px 0 8px 0;
+}
+
+.group-description {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.group-stats {
+    display: flex;
+    gap: 25px;
+    font-size: 13px;
+    color: #95a5a6;
+}
+
+.group-stats span {
+    display: flex;
+    margin: 68px 0 8px 0;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ===== Страница группы (Events) ===== */
+.group-header {
+    background: white;
+    padding: 24px 32px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.group-title {
+    font-size: 32px;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.group-subtitle {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+.group-feedback {
+    margin-top: 12px;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+.group-feedback.success { color: #1e8e3e; }
+.group-feedback.error { color: #c0392b; }
+
+.create-btn {
+    background: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.create-btn:hover {
+    background: #34495e;
+}
+
+.events-table {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.events-header {
+    margin-bottom: 20px;
+}
+
+.events-header h3 {
+    font-size: 20px;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.events-header p {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #ecf0f1;
+    color: #7f8c8d;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.open {
+    background: #d5f5e3;
+    color: #27ae60;
+}
+
+.status-badge.registration {
+    background: #d5f5e3;
+    color: #27ae60;
+}
+
+.status-badge.pending {
+    background: #fdebd0;
+    color: #f39c12;
+}
+
+.status-badge.awaiting {
+    background: #fdebd0;
+    color: #f39c12;
+}
+
+.status-badge.active {
+    background: #d6eaf8;
+    color: #2e86c1;
+}
+
+.status-badge.waiting {
+    background: #fdebd0;
+    color: #f39c12;
+}
+
+.status-badge.passed {
+    background: #d6eaf8;
+    color: #2e86c1;
+}
+
+.status-badge.skipped {
+    background: #f2f3f4;
+    color: #7f8c8d;
+}
+
+.status-badge.closed {
+    background: #fadbd8;
+    color: #e74c3c;
+}
+
+.action-icons {
+    display: flex;
+    gap: 12px;
+}
+
+.action-icons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.action-icons button:hover {
+    opacity: 1;
+}
+
+.row-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+/* Keep the actions column from collapsing too much. */
+.events-table .table td:last-child {
+    min-width: 360px;
+}
+
+/* ===== Заглушка ===== */
+.placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.placeholder-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+#userName {
+    position: static !important;
+    cursor: default !important;
+    top: auto !important;
+    left: auto !important;
+    background-color: transparent !important;
+    font-weight: 500;
+    color: #2c3e50;
+    padding: 0;
+    transition: none !important;
+}
+
+#notifBadge {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    background-color: #6f22db;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+/* ===== Модальное окно ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.modal-box {
+    background: #fff;
+    padding: 32px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    transform: translateY(20px);
+    transition: transform 0.2s;
+}
+.modal-overlay.active .modal-box {
+    transform: translateY(0);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.modal-header h3 { margin: 0; font-size: 20px; color: #2c3e50; }
+.close-modal {
+    background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;
+}
+.form-group { margin-bottom: 16px; }
+.form-group label {
+    display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: #2c3e50;
+}
+.form-group input, .form-group textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px;
+    font-family: inherit; font-size: 14px;
+    box-sizing: border-box;
+    min-width: 0;
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+.form-row { width: 100%; }
+.form-row > .form-group { min-width: 0; }
+
+.modal-actions {
+    display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+}
+.btn {
+    padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500;
+}
+.btn-primary { background: #2c3e50; color: #fff; }
+.btn-primary:hover { background: #34495e; }
+.btn-secondary { background: #ecf0f1; color: #2c3e50; }
+.btn-secondary:hover { background: #d5dbdb; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.groups-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.groups-header h2 {
+    font-size: 24px;
+    color: #2c3e50;
+    margin: 0;
+}
+
+/* Скрываем статус группы внутри детального просмотра */
+#content .group-header .group-status {
+    display: none !important;
+}
+
+/* Фикс: статусы в таблице должны быть в потоке */
+.events-table .status-badge {
+    position: static !important;
+    display: inline-block;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.participants-list table th { padding: 8px; }
+.participants-list table td { padding: 8px; vertical-align: middle; }
+.participants-list .status-badge { position: static !important; display: inline-block; }
+
+/* ===== Browse Groups ===== */
+.browse-header {
+    margin-bottom: 24px;
+}
+
+.browse-header h2 {
+    font-size: 28px;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.browse-header p {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+.browse-card {
+    position: relative;
+    padding-bottom: 60px;
+    min-height: 165px; 
+}
+
+.card-actions {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+}
+
+#content .card-actions .btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+    width: 100%;
+}
+
+/* ===== Поиск групп ===== */
+.search-box {
+    margin-top: 20px;
+    margin-bottom: 24px;
+}
+
+#groupSearch {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#groupSearch:focus {
+    outline: none;
+    border-color: #6f22db;
+    box-shadow: 0 0 0 3px rgba(111, 34, 219, 0.1);
+}
+
+#groupSearch::placeholder {
+    color: #95a5a6;
+}
+
+.browse-card {
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+}
+
+.browse-card .group-description {
+    flex: 1;
+    margin-bottom: 16px;
+}
+
+.card-actions {
+    margin-top: auto;
+}
+
+/* ===== Profile Card ===== */
+.profile-card {
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    max-width: 500px;
+    margin: 40px auto; /* Центрируем по горизонтали */
+}
+
+.profile-card h2 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.profile-card .subtitle {
+    color: #7f8c8d;
+    margin-bottom: 24px;
+}
+
+input:disabled {
+    color: #7f8c8d;
+}
+
+.profile-card .modal-actions {
+    justify-content: flex-start;
+}
+
+.profile-feedback {
+    margin-top: 12px;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+.profile-feedback.success {
+    color: #1e8e3e;
+}
+
+.profile-feedback.error {
+    color: #c0392b;
+}
+
+/* ===== Notifications ===== */
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.notif-header h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #2c3e50;
+}
+
+.btn-clear {
+    padding: 8px 16px;
+    font-size: 13px;
+    margin-left: 190px; 
+}
+
+.notif-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.notif-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #ecf0f1;
+    transition: background 0.2s;
+}
+
+.notif-item.unread {
+    background: #f8f9ff;
+    border-left: 4px solid #6f22db;
+}
+
+.notif-item:hover {
+    background: #f5f7fa;
+}
+
+.notif-icon {
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.notif-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.notif-message {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.notif-time {
+    color: #95a5a6;
+    font-size: 12px;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}

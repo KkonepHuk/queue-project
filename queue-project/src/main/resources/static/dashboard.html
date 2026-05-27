@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | QQueue</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="dashboard-body">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>QApp</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-view="my-groups">My Groups</a>
+            <a href="#" class="nav-item" data-view="browse-groups">Browse Groups</a>
+            <a href="#" class="nav-item" data-view="notifications">
+                Notifications
+                <span class="badge" id="notifBadge">0</span>
+            </a>
+            <a href="#" class="nav-item" data-view="profile">Profile</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1 id="pageTitle">My Groups</h1>
+            <div class="user-info">
+                <span id="userName">Loading...</span>
+                <div class="avatar"></div>
+            </div>
+        </header>
+
+        <div id="content" class="content-area">
+            <!-- Сюда рендерится контент -->
+        </div>
+    </main>
+
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
