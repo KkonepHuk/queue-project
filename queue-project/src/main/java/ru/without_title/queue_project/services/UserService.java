@@ -1,12 +1,17 @@
 package ru.without_title.queue_project.services;
 
 import org.springframework.stereotype.Service;
-// import ru.without_title.queue_project.database.entities.GroupMember;
+import ru.without_title.queue_project.config.SecurityConfig.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.without_title.queue_project.database.entities.User;
 import ru.without_title.queue_project.database.entities.enums.SystemRole;
 import ru.without_title.queue_project.database.dao.UserRepository;
+import ru.without_title.queue_project.dto.request.UserLoginRequest;
 import ru.without_title.queue_project.dto.request.UserRegistrationRequest;
 import ru.without_title.queue_project.dto.request.UserUpdateRequest;
+import ru.without_title.queue_project.dto.response.UserLoginResponse;
+import ru.without_title.queue_project.exceptions.UnauthorizedException;
+import ru.without_title.queue_project.security.JwtTokenUtil;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,9 +21,13 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    public final PasswordEncoder passwordEncoder;
+    public final JwtTokenUtil jwtTokenUtil;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     // --------------------- Регистрация ---------------------
@@ -31,7 +40,7 @@ public class UserService {
         // Создание сущности пользователя
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPasswordHash(request.getPassword()); // пока plain text
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setRole(SystemRole.USER); // стандартная роль
@@ -41,20 +50,16 @@ public class UserService {
     }
 
     // --------------------- Логин ---------------------
-    public User loginUser(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Invalid email or password");
+    public UserLoginResponse loginUser(UserLoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new UnauthorizedException("Invalid email or password");
         }
 
-        User user = userOpt.get();
-
-        // Простейшая проверка пароля (plain text)
-        if (!user.getPasswordHash().equals(password)) {
-            throw new RuntimeException("Invalid email or password");
-        }
-
-        return user;
+        String token = jwtTokenUtil.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+        return new UserLoginResponse(token);
     }
 
     // --------------------- Получение пользователя по UUID ---------------------
