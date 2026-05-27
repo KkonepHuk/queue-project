@@ -145,8 +145,8 @@ public class GroupMemberService {
             GroupMember requesterMember = groupMemberRepository
                     .findByGroup_GroupIdAndUser_UserId(groupId, requester.getUserId())
                     .orElseThrow(() -> new RuntimeException("You are not a member of this group"));
-            if (requesterMember.getRole() != GroupRole.OWNER) {
-                throw new RuntimeException("Only the group owner can remove members");
+            if (requesterMember.getRole() != GroupRole.OWNER && requesterMember.getRole() != GroupRole.MODERATOR) {
+                throw new RuntimeException("Only the group owner or moderator can remove members");
             }
         }
 
@@ -170,15 +170,34 @@ public class GroupMemberService {
     }
 
     // --------------------- Изменение роли ---------------------
-    // Вспомогательный метод для изменения роли (чуть подправил твой)
-    public GroupMember updateRole(UUID groupId, UUID memberId, GroupRole role) {
+    @Transactional
+    public GroupMember updateRole(UUID groupId, UUID memberId, GroupRole role, String requesterEmail, boolean requesterIsAdmin) {
+        if (role == null) {
+            throw new RuntimeException("Role is required");
+        }
         // Нельзя просто так взять и назначить OWNER через этот метод,
         // иначе у группы будет два владельца.
         if (role == GroupRole.OWNER) {
             throw new RuntimeException("Use transferOwnership method to change the owner");
         }
 
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!requesterIsAdmin) {
+            GroupMember requesterMember = groupMemberRepository
+                    .findByGroup_GroupIdAndUser_UserId(groupId, requester.getUserId())
+                    .orElseThrow(() -> new RuntimeException("You are not a member of this group"));
+            if (requesterMember.getRole() != GroupRole.OWNER) {
+                throw new RuntimeException("Only the group owner can change roles");
+            }
+        }
+
         GroupMember member = getMember(groupId, memberId);
+        if (member.getRole() == GroupRole.OWNER) {
+            throw new RuntimeException("Cannot change the group owner's role");
+        }
+
         member.setRole(role);
         return groupMemberRepository.save(member);
     }

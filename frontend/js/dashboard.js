@@ -217,7 +217,7 @@ async function renderGroupDetail(groupId) {
         const myId = myProfile.user_id;
         const members = await Api.getGroupMembers(groupId).catch(() => []);
         const myMember = members.find(m => m.user_id === myId);
-        const isOwner = myMember?.role === 'owner';
+        const isManager = myMember?.role === 'owner' || myMember?.role === 'moderator';
 
         content.innerHTML = `
             <div class="group-header">
@@ -264,7 +264,7 @@ async function renderGroupDetail(groupId) {
                                 const notFull = (typeof queue.max_size === 'number' && typeof count === 'number') ? count < queue.max_size : true;
                                 const canJoin = !!queue.is_active && regOk && notFull;
                                 const phase = getQueuePhase(queue, nowMs);
-                                const canDeleteQueue = isOwner || queue.created_by === myId;
+                                const canDeleteQueue = isManager || queue.created_by === myId;
                                 let joinDisabledTitle = '';
                                 if (!queue.is_active) {
                                     joinDisabledTitle = 'Очередь закрыта';
@@ -482,6 +482,7 @@ async function openGroupMembersModal(groupId, groupName) {
         const members = await Api.getGroupMembers(groupId);
         const me = members.find(m => m.user_id === myId);
         const isOwner = me?.role === 'owner';
+        const isManager = me?.role === 'owner' || me?.role === 'moderator';
 
         // Fetch user info for display (best-effort).
         const usersById = {};
@@ -508,7 +509,7 @@ async function openGroupMembersModal(groupId, groupName) {
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Joined</th>
-                                    ${isOwner ? '<th></th>' : ''}
+                                    ${isManager ? '<th></th>' : ''}
                                 </tr>
                             </thead>
                             <tbody>
@@ -518,14 +519,22 @@ async function openGroupMembersModal(groupId, groupName) {
                                     const email = u?.email || '';
                                     const joined = m.joined_at ? new Date(m.joined_at).toLocaleString() : '';
                                     const role = String(m.role || 'member').toUpperCase();
-                                    const canKick = isOwner && m.role !== 'owner' && m.user_id !== myId;
+                                    const canKick = isManager && m.role !== 'owner' && m.user_id !== myId;
+                                    const canEditRole = isOwner && m.role !== 'owner' && m.user_id !== myId;
                                     return `
                                         <tr>
                                             <td>${name || `User ${String(m.user_id).slice(0, 8)}`}</td>
                                             <td>${email}</td>
-                                            <td>${role}</td>
+                                            <td>
+                                                ${canEditRole ? `
+                                                    <select class="role-select" data-member-id="${m.group_member_id}">
+                                                        <option value="MEMBER" ${m.role === 'member' ? 'selected' : ''}>MEMBER</option>
+                                                        <option value="MODERATOR" ${m.role === 'moderator' ? 'selected' : ''}>MODERATOR</option>
+                                                    </select>
+                                                ` : role}
+                                            </td>
                                             <td>${joined}</td>
-                                            ${isOwner ? `
+                                            ${isManager ? `
                                                 <td style="text-align:right;">
                                                     ${canKick ? `<button class="btn btn-danger btn-sm kick-member-btn" data-member-id="${m.group_member_id}" data-name="${name}">Remove</button>` : ''}
                                                 </td>
@@ -580,6 +589,26 @@ async function openGroupMembersModal(groupId, groupName) {
                 }
             });
         });
+
+        document.querySelectorAll('.role-select').forEach(sel => {
+            sel.addEventListener('change', async (e) => {
+                const memberId = e.currentTarget.dataset.memberId;
+                const role = e.currentTarget.value;
+                const feedback = document.getElementById('groupMembersFeedback');
+                try {
+                    await Api.updateGroupMemberRole(groupId, memberId, role);
+                    if (feedback) {
+                        feedback.textContent = 'Role updated';
+                        feedback.className = 'group-feedback success';
+                    }
+                } catch (err) {
+                    if (feedback) {
+                        feedback.textContent = err.message || 'Failed to update role';
+                        feedback.className = 'group-feedback error';
+                    }
+                }
+            });
+        });
     };
 
     await render();
@@ -599,7 +628,7 @@ async function openParticipantsModal(groupId, queueId) {
         const myId = myProfile.user_id;
         const members = await Api.getGroupMembers(groupId).catch(() => []);
         const myMember = members.find(m => m.user_id === myId);
-        const isOwner = myMember?.role === 'owner';
+        const isManager = myMember?.role === 'owner' || myMember?.role === 'moderator';
         const phase = typeof getQueuePhase === 'function' ? getQueuePhase(queue, Date.now()) : { badgeClass: 'closed' };
         const canAnswerNow = phase.badgeClass === 'active';
         // Swap is not implemented on the backend yet (UI stubs existed in template).
@@ -645,8 +674,8 @@ async function openParticipantsModal(groupId, queueId) {
                                         const waitingCount = waitingPositions.length;
                                         const currentPos = waitingPositions.length ? Math.min(...waitingPositions) : null;
                                         const isCurrent = currentPos !== null && p.status === 'waiting' && p.position === currentPos;
-                                        const canSkip = (isMe || isOwner) && p.status === 'waiting';
-                                        const canPass = canAnswerNow && (isMe || isOwner) && isCurrent;
+                                        const canSkip = (isMe || isManager) && p.status === 'waiting';
+                                        const canPass = canAnswerNow && (isMe || isManager) && isCurrent;
                                         const st = formatParticipantStatus(p.status);
                                         return `
                                             <tr style="${isMe ? 'background: #f0f8ff; font-weight: bold;' : ''}">

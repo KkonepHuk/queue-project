@@ -115,9 +115,9 @@ public class QueueService {
 
         var groupId = queue.getGroup().getGroupId();
         var member = groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, requester.getUserId()).orElse(null);
-        boolean isOwner = member != null && member.getRole() == GroupRole.OWNER;
-        if (!isOwner) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only queue creator or group owner can perform this action");
+        boolean isOwnerOrMod = member != null && (member.getRole() == GroupRole.OWNER || member.getRole() == GroupRole.MODERATOR);
+        if (!isOwnerOrMod) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only queue creator, group owner, or moderator can perform this action");
         }
     }
 }

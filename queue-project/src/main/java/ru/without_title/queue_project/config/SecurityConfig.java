@@ -70,6 +70,8 @@ public class SecurityConfig {
                                 // вступление в группу
                                 .requestMatchers(HttpMethod.POST, "/api/v1/groups/*/members/me").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/*/members/me").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                // изменение роли участника (право проверяем в сервисе: OWNER группы)
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/groups/*/members/*").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // удалить участника (разрешаем USER, но право проверяем в сервисе: только OWNER может кикать)
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/*/members/*").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // управление участниками

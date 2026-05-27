@@ -211,6 +211,14 @@ export const Api = {
         return { success: true };
     },
 
+    async updateGroupMemberRole(groupId, memberId, role) {
+        await request(`/groups/${groupId}/members/${memberId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ role })
+        });
+        return { success: true };
+    },
+
     async getQueues(groupId) {
         const queues = await request(`/groups/${groupId}/queues`);
         const enriched = await Promise.all(queues.map(async (queue) => {

@@ -99,15 +99,15 @@ public class QueueEntryService {
 
         var groupId = queue.getGroup().getGroupId();
         var requesterMember = groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, requester.getUserId()).orElse(null);
-        boolean requesterIsOwner = requesterMember != null && requesterMember.getRole() == GroupRole.OWNER;
+        boolean requesterIsManager = requesterMember != null && (requesterMember.getRole() == GroupRole.OWNER || requesterMember.getRole() == GroupRole.MODERATOR);
 
         QueueEntry entry = entryRepository.findByQueue_QueueIdAndUser_UserId(queueId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Запись не найдена"));
 
         if (status == QueueStatus.SKIPPED) {
             // Skip rules: the user can skip themselves, or OWNER can skip anyone (admins always can).
-            if (!requesterIsAdmin && !requesterIsOwner && !requester.getUserId().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Skip is allowed only for the participant or the group owner");
+            if (!requesterIsAdmin && !requesterIsManager && !requester.getUserId().equals(userId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Skip is allowed only for the participant or the group owner/moderator");
             }
             if (entry.getStatus() != QueueStatus.WAITING) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Only WAITING participants can be skipped");
@@ -117,8 +117,8 @@ public class QueueEntryService {
 
         if (status == QueueStatus.PASSED) {
             // Passed rules: the user can mark themselves as answered, or OWNER can mark anyone (admins always can).
-            if (!requesterIsAdmin && !requesterIsOwner && !requester.getUserId().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Marking as PASSED is allowed only for the participant or the group owner");
+            if (!requesterIsAdmin && !requesterIsManager && !requester.getUserId().equals(userId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Marking as PASSED is allowed only for the participant or the group owner/moderator");
             }
             entry.setStatus(status);
             return entryRepository.save(entry);

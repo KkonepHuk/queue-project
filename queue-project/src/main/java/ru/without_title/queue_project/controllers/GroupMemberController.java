@@ -92,10 +92,14 @@ public class GroupMemberController {
     public GroupMemberResponse updateRole(
             @PathVariable UUID groupId,
             @PathVariable UUID memberId,
-            @RequestBody GroupMemberUpdateRequest request
+            @RequestBody GroupMemberUpdateRequest request,
+            Authentication authentication
     ) {
+        boolean isAdmin = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority()));
         return GroupMemberResponse.fromEntity(
-                service.updateRole(groupId, memberId, request.getRole())
+                service.updateRole(groupId, memberId, request.getRole(), authentication.getName(), isAdmin)
         );
     }
 }
