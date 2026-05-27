@@ -31,4 +31,16 @@ public class NotificationController {
     public void markAsRead(@PathVariable UUID id) {
         notificationService.markAsRead(id);
     }
+
+    @PatchMapping("/read-all")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void markAllAsRead(Authentication authentication) {
+        notificationService.markAllAsRead(authentication.getName());
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAll(Authentication authentication) {
+        notificationService.deleteAllMyNotifications(authentication.getName());
+    }
 }

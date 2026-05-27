@@ -646,6 +646,49 @@ async function openParticipantsModal(groupId, queueId) {
             }
         }));
 
+        const computeCurrentPos = (participants) => {
+            const waitingPositions = participants
+                .filter(x => x.status === 'waiting')
+                .map(x => x.position)
+                .filter(pos => typeof pos === 'number');
+            return waitingPositions.length ? Math.min(...waitingPositions) : null;
+        };
+
+        const buildParticipantRows = (participants) => {
+            const currentPos = computeCurrentPos(participants);
+            return participants.map(p => {
+                const isMe = p.user_id === myId;
+                const u = usersById[p.user_id];
+                const displayName = u
+                    ? (`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email)
+                    : `User ${String(p.user_id).slice(0, 8)}`;
+                const canSwap = false;
+                const hasPendingReq = false;
+                const isCurrent = currentPos !== null && p.status === 'waiting' && p.position === currentPos;
+                const canSkip = (isMe || isManager) && p.status === 'waiting';
+                const canPass = canAnswerNow && (isMe || isManager) && isCurrent;
+                const st = formatParticipantStatus(p.status);
+                return `
+                    <tr style="${isMe ? 'background: #f0f8ff; font-weight: bold;' : ''}">
+                        <td>${p.position}</td>
+                        <td>${displayName} ${isMe ? '(You)' : ''}</td>
+                        <td>
+                            <span class="status-badge ${st.cls}">${st.label}</span>
+                        </td>
+                        <td>
+                            ${canPass ? `<button class="btn btn-sm btn-primary pass-btn" data-user-id="${p.user_id}" data-name="${displayName}">Answered</button>` : ''}
+                            ${canSkip ? `<button class="btn btn-sm btn-secondary skip-btn" data-user-id="${p.user_id}" data-name="${displayName}">Skip</button>` : ''}
+                            ${canSwap && !hasPendingReq 
+                                ? `<button class="btn btn-sm btn-primary swap-btn" data-target="${p.user_id}">Swap</button>` 
+                                : hasPendingReq 
+                                    ? `<span style="color: orange; font-size: 12px;">Pending...</span>` 
+                                    : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
         const html = `
             <div class="modal-overlay active" id="participantsModal">
                 <div class="modal-box" style="max-width: 600px;">
@@ -657,44 +700,8 @@ async function openParticipantsModal(groupId, queueId) {
                         ${Array.isArray(queue.participants) && queue.participants.length ? `
                             <table class="table" style="font-size: 14px;">
                                 <thead><tr><th>#</th><th>Name</th><th>Status</th><th>Action</th></tr></thead>
-                                <tbody>
-                                    ${queue.participants.map(p => {
-                                        const isMe = p.user_id === myId;
-                                        const u = usersById[p.user_id];
-                                        const displayName = u
-                                            ? (`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email)
-                                            : `User ${String(p.user_id).slice(0, 8)}`;
-                                        const canSwap = false;
-                                        const hasPendingReq = false;
-                                        const waitingPositions = queue.participants
-                                            .filter(x => x.status === 'waiting')
-                                            .map(x => x.position)
-                                            .filter(pos => typeof pos === 'number');
-                                        const waitingCount = waitingPositions.length;
-                                        const currentPos = waitingPositions.length ? Math.min(...waitingPositions) : null;
-                                        const isCurrent = currentPos !== null && p.status === 'waiting' && p.position === currentPos;
-                                        const canSkip = (isMe || isManager) && p.status === 'waiting';
-                                        const canPass = canAnswerNow && (isMe || isManager) && isCurrent;
-                                        const st = formatParticipantStatus(p.status);
-                                        return `
-                                            <tr style="${isMe ? 'background: #f0f8ff; font-weight: bold;' : ''}">
-                                                <td>${p.position}</td>
-                                                <td>${displayName} ${isMe ? '(You)' : ''}</td>
-                                                <td>
-                                                    <span class="status-badge ${st.cls}">${st.label}</span>
-                                                </td>
-                                                <td>
-                                                    ${canPass ? `<button class="btn btn-sm btn-primary pass-btn" data-user-id="${p.user_id}" data-name="${displayName}">Answered</button>` : ''}
-                                                    ${canSkip ? `<button class="btn btn-sm btn-secondary skip-btn" data-user-id="${p.user_id}" data-name="${displayName}">Skip</button>` : ''}
-                                                    ${canSwap && !hasPendingReq 
-                                                        ? `<button class="btn btn-sm btn-primary swap-btn" data-target="${p.user_id}">Swap</button>` 
-                                                        : hasPendingReq 
-                                                            ? `<span style="color: orange; font-size: 12px;">Pending...</span>` 
-                                                            : ''}
-                                                </td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
+                                <tbody id="participantsTbody">
+                                    ${buildParticipantRows(queue.participants)}
                                 </tbody>
                             </table>
                         ` : (queue.participants === null
@@ -717,7 +724,19 @@ async function openParticipantsModal(groupId, queueId) {
         document.body.insertAdjacentHTML('beforeend', html);
         
         // Close handlers
-        const close = () => closeModal('participantsModal');
+        let pollTimer = null;
+        let lastKey = Array.isArray(queue.participants)
+            ? queue.participants.map(p => `${p.user_id}:${p.position}:${p.status}`).join('|')
+            : null;
+        const stopPolling = () => {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = null;
+        };
+
+        const close = () => {
+            stopPolling();
+            closeModal('participantsModal');
+        };
         const closeBtn = document.getElementById('closePartModal');
         const modalOverlay = document.getElementById('participantsModal');
         closeBtn?.addEventListener('click', close);
@@ -730,70 +749,104 @@ async function openParticipantsModal(groupId, queueId) {
         document.addEventListener('keydown', onKeyDown, { once: true });
 
         // Swap wiring intentionally disabled until backend is implemented.
-
-        document.querySelectorAll('.skip-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const userId = btn.dataset.userId;
-                const name = btn.dataset.name || 'this participant';
-                const isMe = userId === myId;
-                const ok = await openConfirmModal({
-                    title: 'Skip Participant',
-                    message: isMe
-                        ? 'Skip yourself? You will be moved to the end.'
-                        : `Skip ${name}? Participant will be moved to the end.`,
-                    confirmText: 'Skip',
-                    cancelText: 'Cancel',
-                    confirmClass: 'btn-secondary'
-                });
-                if (!ok) return;
-                try {
-                    await Api.updateQueueEntryStatus(queueId, userId, 'SKIPPED');
-                    await renderGroupDetail(groupId);
-                    closeModal('participantsModal');
-                    await openParticipantsModal(groupId, queueId);
-                } catch (err) {
-                    const feedback = document.getElementById('groupFeedback');
-                    if (feedback) {
-                        feedback.textContent = err.message || 'Failed to skip participant';
-                        feedback.className = 'group-feedback error';
-                    } else {
-                        alert(err.message);
+        const wireParticipantActions = () => {
+            document.querySelectorAll('#participantsModal .skip-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const userId = btn.dataset.userId;
+                    const name = btn.dataset.name || 'this participant';
+                    const isMe = userId === myId;
+                    const ok = await openConfirmModal({
+                        title: 'Skip Participant',
+                        message: isMe
+                            ? 'Skip yourself? You will be moved to the end.'
+                            : `Skip ${name}? Participant will be moved to the end.`,
+                        confirmText: 'Skip',
+                        cancelText: 'Cancel',
+                        confirmClass: 'btn-secondary'
+                    });
+                    if (!ok) return;
+                    try {
+                        await Api.updateQueueEntryStatus(queueId, userId, 'SKIPPED');
+                        await renderGroupDetail(groupId);
+                        stopPolling();
+                        closeModal('participantsModal');
+                        await openParticipantsModal(groupId, queueId);
+                    } catch (err) {
+                        const feedback = document.getElementById('groupFeedback');
+                        if (feedback) {
+                            feedback.textContent = err.message || 'Failed to skip participant';
+                            feedback.className = 'group-feedback error';
+                        } else {
+                            alert(err.message);
+                        }
                     }
-                }
-            });
-        });
-
-        document.querySelectorAll('.pass-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const userId = btn.dataset.userId;
-                const name = btn.dataset.name || 'this participant';
-                const isMe = userId === myId;
-                const ok = await openConfirmModal({
-                    title: 'Mark As Answered',
-                    message: isMe
-                        ? 'Mark yourself as answered? The queue will move to the next person.'
-                        : `Mark ${name} as answered? The queue will move to the next person.`,
-                    confirmText: 'Answered',
-                    cancelText: 'Cancel',
-                    confirmClass: 'btn-primary'
                 });
-                if (!ok) return;
-                try {
-                    await Api.updateQueueEntryStatus(queueId, userId, 'PASSED');
-                    await renderGroupDetail(groupId);
-                    closeModal('participantsModal');
-                    await openParticipantsModal(groupId, queueId);
-                } catch (err) {
-                    const feedback = document.getElementById('groupFeedback');
-                    if (feedback) {
-                        feedback.textContent = err.message || 'Failed to mark as answered';
-                        feedback.className = 'group-feedback error';
-                    } else {
-                        alert(err.message);
-                    }
-                }
             });
-        });
+
+            document.querySelectorAll('#participantsModal .pass-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const userId = btn.dataset.userId;
+                    const name = btn.dataset.name || 'this participant';
+                    const isMe = userId === myId;
+                    const ok = await openConfirmModal({
+                        title: 'Mark As Answered',
+                        message: isMe
+                            ? 'Mark yourself as answered? The queue will move to the next person.'
+                            : `Mark ${name} as answered? The queue will move to the next person.`,
+                        confirmText: 'Answered',
+                        cancelText: 'Cancel',
+                        confirmClass: 'btn-primary'
+                    });
+                    if (!ok) return;
+                    try {
+                        await Api.updateQueueEntryStatus(queueId, userId, 'PASSED');
+                        await renderGroupDetail(groupId);
+                        stopPolling();
+                        closeModal('participantsModal');
+                        await openParticipantsModal(groupId, queueId);
+                    } catch (err) {
+                        const feedback = document.getElementById('groupFeedback');
+                        if (feedback) {
+                            feedback.textContent = err.message || 'Failed to mark as answered';
+                            feedback.className = 'group-feedback error';
+                        } else {
+                            alert(err.message);
+                        }
+                    }
+                });
+            });
+        };
+
+        wireParticipantActions();
+
+        // Poll entries so "who is current" updates for everyone without reload.
+        const refreshParticipants = async () => {
+            const latest = await Api.getQueueEntries(queueId).catch(() => null);
+            if (!latest) return;
+
+            const nextKey = latest.map(p => `${p.user_id}:${p.position}:${p.status}`).join('|');
+            if (nextKey === lastKey) return;
+            lastKey = nextKey;
+
+            // Best-effort: resolve names for any new users.
+            await Promise.all(latest.map(async (p) => {
+                if (!p?.user_id || usersById[p.user_id]) return;
+                try {
+                    usersById[p.user_id] = await Api.getUser(p.user_id);
+                } catch {
+                    usersById[p.user_id] = null;
+                }
+            }));
+
+            const tbody = document.getElementById('participantsTbody');
+            if (!tbody) return;
+            const listEl = document.querySelector('#participantsModal .participants-list');
+            const prevScroll = listEl ? listEl.scrollTop : 0;
+            tbody.innerHTML = buildParticipantRows(latest);
+            if (listEl) listEl.scrollTop = prevScroll;
+            wireParticipantActions();
+        };
+        pollTimer = setInterval(refreshParticipants, 3000);
 
         // Swap wiring intentionally disabled until backend is implemented.
     } catch (err) {
@@ -1239,7 +1292,10 @@ async function renderNotifications() {
         const html = `
             <div class="notif-header">
                 <h2>Notifications</h2>
-                <button class="btn btn-sm btn-secondary btn-clear" id="clearNotifs">Clear All</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-sm btn-secondary btn-clear" id="clearNotifs">Mark Read</button>
+                    <button class="btn btn-sm btn-danger" id="deleteNotifs">Delete</button>
+                </div>
             </div>
             <div class="notif-list">
                 ${notifs.length === 0 ? `
@@ -1267,6 +1323,38 @@ async function renderNotifications() {
             updateNotificationsBadge();
             renderNotifications();
         });
+
+        document.getElementById('deleteNotifs').addEventListener('click', async () => {
+            const ok = await openConfirmModal({
+                title: 'Delete Notifications',
+                message: 'Delete all notifications? This cannot be undone.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
+            });
+            if (!ok) return;
+            await Api.deleteNotifications();
+            updateNotificationsBadge();
+            renderNotifications();
+        });
+
+        // Mark as read on click (no navigation for now).
+        document.querySelectorAll('.notif-item').forEach(item => {
+            item.addEventListener('click', async () => {
+                const id = item.dataset.id;
+                if (!id) return;
+                if (item.classList.contains('unread')) {
+                    try {
+                        await Api.markAsRead(id);
+                        item.classList.remove('unread');
+                        item.classList.add('read');
+                        updateNotificationsBadge();
+                    } catch {
+                        // ignore
+                    }
+                }
+            });
+        });
         
     } catch (err) {
         content.innerHTML = '<div class="error">Failed to load notifications</div>';
@@ -1288,3 +1376,6 @@ navItems.forEach(item => {
 
 loadUserProfile();
 navigateTo('my-groups');
+
+// Lightweight polling so the badge updates even when you stay on one screen.
+setInterval(updateNotificationsBadge, 15000);

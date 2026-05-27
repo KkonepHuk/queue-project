@@ -90,7 +90,7 @@ function toNotificationDto(notification) {
     return {
         id: notification.notificationId,
         type: String(notification.type || 'SYSTEM').toLowerCase(),
-        title: notification.type || 'Notification',
+        title: notification.groupName || notification.queueTitle || notification.type || 'Notification',
         message: notification.message,
         timestamp: notification.createdAt || notification.scheduledAt,
         read: notification.status === 'READ'
@@ -256,6 +256,11 @@ export const Api = {
         return { success: true };
     },
 
+    async getQueueEntries(queueId) {
+        const entries = await request(`/queues/${queueId}/entries`);
+        return entries.map(toParticipantDto);
+    },
+
     async updateQueueEntryStatus(queueId, userId, status) {
         await request(`/queues/${queueId}/entries/${userId}`, {
             method: 'PATCH',
@@ -287,6 +292,12 @@ export const Api = {
     },
 
     async clearNotifications() {
+        await request('/notifications/read-all', { method: 'PATCH' });
+        return { success: true };
+    },
+
+    async deleteNotifications() {
+        await request('/notifications', { method: 'DELETE' });
         return { success: true };
     }
 };

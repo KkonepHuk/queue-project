@@ -22,6 +22,8 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, UUID> {
 
     List<QueueEntry> findByQueue_QueueIdAndStatus(UUID queueId, QueueStatus status);
 
+    Optional<QueueEntry> findFirstByQueue_QueueIdAndStatusOrderByPositionAsc(UUID queueId, QueueStatus status);
+
     @Modifying
     @Query("delete from QueueEntry qe where qe.queue.group.groupId = :groupId and qe.user.userId = :userId")
     void deleteByGroupIdAndUserId(@Param("groupId") UUID groupId, @Param("userId") UUID userId);

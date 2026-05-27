@@ -5,12 +5,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import ru.without_title.queue_project.database.entities.QueueEntry;
+import ru.without_title.queue_project.database.entities.Queue;
 import ru.without_title.queue_project.database.dao.*;
 import ru.without_title.queue_project.database.entities.enums.*;
 import ru.without_title.queue_project.database.entities.enums.GroupRole;
 import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
+import ru.without_title.queue_project.database.entities.enums.NotificationType;
 
 @Service
 public class QueueEntryService {
@@ -18,13 +20,15 @@ public class QueueEntryService {
     private final QueueRepository queueRepository;
     private final UserRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final NotificationService notificationService;
 
     public QueueEntryService(QueueEntryRepository entryRepository, QueueRepository queueRepository, UserRepository userRepository,
-            GroupMemberRepository groupMemberRepository) {
+            GroupMemberRepository groupMemberRepository, NotificationService notificationService) {
         this.entryRepository = entryRepository;
         this.queueRepository = queueRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -34,6 +38,8 @@ public class QueueEntryService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Очередь не найдена"));
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+
+        UUID beforeCurrent = currentWaitingUserId(queueId);
 
         // 2. Проверяем, активна ли она и открыта ли регистрация
         LocalDateTime now = LocalDateTime.now();
@@ -64,6 +70,9 @@ public class QueueEntryService {
         entry.setJoinedAt(now);
 
         entryRepository.save(entry);
+
+        UUID afterCurrent = currentWaitingUserId(queueId);
+        notifyTurnChangedIfNeeded(queue, beforeCurrent, afterCurrent);
     }
 
     @Transactional
@@ -71,9 +80,12 @@ public class QueueEntryService {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
 
+        UUID beforeCurrent = currentWaitingUserId(queueId);
+
         QueueEntry entry = entryRepository.findByQueue_QueueIdAndUser_UserId(queueId, user.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Вы не записаны в эту очередь"));
 
+        var queue = entry.getQueue();
         int removedPos = entry.getPosition() != null ? entry.getPosition() : 0;
         entryRepository.delete(entry);
 
@@ -84,6 +96,9 @@ public class QueueEntryService {
             entryRepository.bumpPositionsAfter(queueId, removedPos, OFFSET);
             entryRepository.shiftBumpedPositionsDown(queueId, removedPos, OFFSET);
         }
+
+        UUID afterCurrent = currentWaitingUserId(queueId);
+        notifyTurnChangedIfNeeded(queue, beforeCurrent, afterCurrent);
     }
 
     public List<QueueEntry> getEntriesByQueueId(UUID queueId) {
@@ -96,6 +111,8 @@ public class QueueEntryService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
         var queue = queueRepository.findById(queueId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Очередь не найдена"));
+
+        UUID beforeCurrent = currentWaitingUserId(queueId);
 
         var groupId = queue.getGroup().getGroupId();
         var requesterMember = groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, requester.getUserId()).orElse(null);
@@ -112,7 +129,10 @@ public class QueueEntryService {
             if (entry.getStatus() != QueueStatus.WAITING) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Only WAITING participants can be skipped");
             }
-            return skipEntry(queueId, entry);
+            QueueEntry updated = skipEntry(queueId, entry);
+            UUID afterCurrent = currentWaitingUserId(queueId);
+            notifyTurnChangedIfNeeded(queue, beforeCurrent, afterCurrent);
+            return updated;
         }
 
         if (status == QueueStatus.PASSED) {
@@ -121,7 +141,10 @@ public class QueueEntryService {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Marking as PASSED is allowed only for the participant or the group owner/moderator");
             }
             entry.setStatus(status);
-            return entryRepository.save(entry);
+            QueueEntry updated = entryRepository.save(entry);
+            UUID afterCurrent = currentWaitingUserId(queueId);
+            notifyTurnChangedIfNeeded(queue, beforeCurrent, afterCurrent);
+            return updated;
         }
 
         // Other status changes are "moderation": creator/OWNER/MODERATOR/admin.
@@ -134,7 +157,10 @@ public class QueueEntryService {
         }
 
         entry.setStatus(status);
-        return entryRepository.save(entry);
+        QueueEntry updated = entryRepository.save(entry);
+        UUID afterCurrent = currentWaitingUserId(queueId);
+        notifyTurnChangedIfNeeded(queue, beforeCurrent, afterCurrent);
+        return updated;
     }
 
     private QueueEntry skipEntry(UUID queueId, QueueEntry entry) {
@@ -170,5 +196,42 @@ public class QueueEntryService {
         if (maxPos <= 1) return;
         entryRepository.bumpAllPositions(queueId, OFFSET);
         entryRepository.repackPositions(queueId);
+    }
+
+    private UUID currentWaitingUserId(UUID queueId) {
+        return entryRepository.findFirstByQueue_QueueIdAndStatusOrderByPositionAsc(queueId, QueueStatus.WAITING)
+                .map(qe -> qe.getUser().getUserId())
+                .orElse(null);
+    }
+
+    private void notifyTurnChangedIfNeeded(Queue queue, UUID beforeCurrent, UUID afterCurrent) {
+        if (queue == null) return;
+        // Notify only when the queue is in the "active" phase (event started) and not closed.
+        LocalDateTime now = LocalDateTime.now();
+        if (!queue.getIsActive()) return;
+        if (queue.getEventDate() != null && now.isBefore(queue.getEventDate())) return;
+        if (afterCurrent == null) return;
+        if (afterCurrent.equals(beforeCurrent)) return;
+
+        var currentUser = userRepository.findById(afterCurrent).orElse(null);
+        String currentName = currentUser == null
+                ? "Someone"
+                : ((String.join(" ", List.of(
+                        currentUser.getFirstName() == null ? "" : currentUser.getFirstName(),
+                        currentUser.getLastName() == null ? "" : currentUser.getLastName()))
+                        .trim().isEmpty())
+                        ? currentUser.getEmail()
+                        : (currentUser.getFirstName() + " " + currentUser.getLastName()).trim());
+
+        // Notify only active participants (WAITING) to keep noise low.
+        List<QueueEntry> waiting = entryRepository.findByQueue_QueueIdAndStatus(queue.getQueueId(), QueueStatus.WAITING);
+        for (QueueEntry e : waiting) {
+            var recipient = e.getUser();
+            if (recipient == null) continue;
+            String msg = recipient.getUserId().equals(afterCurrent)
+                    ? ("It's your turn in \"" + queue.getTitle() + "\"")
+                    : ("Now answering: " + currentName + " in \"" + queue.getTitle() + "\"");
+            notificationService.createNotification(recipient, queue, NotificationType.QUEUE, msg);
+        }
     }
 }
