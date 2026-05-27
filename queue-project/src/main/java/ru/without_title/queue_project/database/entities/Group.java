@@ -53,6 +53,10 @@ public class Group {
         return createdAt;
     }
 
+    public void setGroupId(UUID groupId) {
+        this.groupId = groupId;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

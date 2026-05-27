@@ -7,7 +7,6 @@ import ru.without_title.queue_project.database.entities.enums.SystemRole;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-
 @Entity
 @Table(name = "users")
 public class User {
@@ -41,21 +40,66 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    public User() {}
+    public User() {
+    }
 
-    public UUID getUserId() { return userId; }
-    public String getEmail() { return email; }
-    public String getPasswordHash() { return passwordHash; }
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
-    public SystemRole getRole() { return role; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public boolean isActive() { return isActive; }
+    public UUID getUserId() {
+        return userId;
+    }
 
-    public void setEmail(String email) { this.email = email; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-    public void setRole(SystemRole role) { this.role = role; }
-    public void setActive(boolean active) { isActive = active; }
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public SystemRole getRole() {
+        return role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setRole(SystemRole role) {
+        this.role = role;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 }
