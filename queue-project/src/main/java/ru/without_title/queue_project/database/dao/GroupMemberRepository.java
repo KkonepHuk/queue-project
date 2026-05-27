@@ -7,6 +7,8 @@ import ru.without_title.queue_project.database.entities.enums.GroupRole;
 import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember, UUID> {
 
@@ -19,4 +21,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, UUID> 
     Optional<GroupMember> findByGroup_GroupIdAndRole(UUID groupId, GroupRole role);
 
     Optional<GroupMember> findByGroup_GroupIdAndUser_UserId(UUID groupId, UUID userId);
+
+    @Query("select gm.group from GroupMember gm where gm.user.userId = :userId")
+    List<ru.without_title.queue_project.database.entities.Group> findGroupsByUserId(@Param("userId") UUID userId);
 }

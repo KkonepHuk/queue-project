@@ -1,6 +1,7 @@
 package ru.without_title.queue_project.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.dto.request.GroupMemberCreateRequest;
 import ru.without_title.queue_project.dto.request.GroupMemberUpdateRequest;
@@ -32,6 +33,26 @@ public class GroupMemberController {
         );
     }
 
+    @PostMapping("/me")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GroupMemberResponse joinGroup(
+            @PathVariable UUID groupId,
+            Authentication authentication
+    ) {
+        return GroupMemberResponse.fromEntity(
+                service.joinGroup(groupId, authentication.getName())
+        );
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveGroup(
+            @PathVariable UUID groupId,
+            Authentication authentication
+    ) {
+        service.leaveGroup(groupId, authentication.getName());
+    }
+
     // --------------------- Получить всех ---------------------
     @GetMapping
     public List<GroupMemberResponse> getMembers(@PathVariable UUID groupId) {
@@ -57,9 +78,13 @@ public class GroupMemberController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMember(
             @PathVariable UUID groupId,
-            @PathVariable UUID memberId
+            @PathVariable UUID memberId,
+            Authentication authentication
     ) {
-        service.removeMember(groupId, memberId);
+        boolean isAdmin = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority()));
+        service.removeMember(groupId, memberId, authentication.getName(), isAdmin);
     }
 
     // --------------------- Изменить роль ---------------------
@@ -67,10 +92,14 @@ public class GroupMemberController {
     public GroupMemberResponse updateRole(
             @PathVariable UUID groupId,
             @PathVariable UUID memberId,
-            @RequestBody GroupMemberUpdateRequest request
+            @RequestBody GroupMemberUpdateRequest request,
+            Authentication authentication
     ) {
+        boolean isAdmin = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority()));
         return GroupMemberResponse.fromEntity(
-                service.updateRole(groupId, memberId, request.getRole())
+                service.updateRole(groupId, memberId, request.getRole(), authentication.getName(), isAdmin)
         );
     }
 }

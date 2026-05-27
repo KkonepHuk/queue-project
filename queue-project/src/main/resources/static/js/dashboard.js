@@ -332,7 +332,14 @@ async function renderGroupDetail(groupId) {
         document.querySelectorAll('.leave-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const qId = e.target.dataset.queueId;
-                if (confirm('Are you sure you want to leave this queue?')) {
+                const ok = await openConfirmModal({
+                    title: 'Leave Queue',
+                    message: 'Are you sure you want to leave this queue?',
+                    confirmText: 'Leave',
+                    cancelText: 'Cancel',
+                    confirmClass: 'btn-danger'
+                });
+                if (ok) {
                     try {
                         await Api.leaveQueue(groupId, qId);
                         await renderGroupDetail(groupId);
@@ -478,140 +485,132 @@ async function openGroupMembersModal(groupId, groupName) {
     const myProfile = await Api.getProfile();
     const myId = myProfile.user_id;
 
-    const render = async () => {
-        const members = await Api.getGroupMembers(groupId);
-        const me = members.find(m => m.user_id === myId);
-        const isOwner = me?.role === 'owner';
-        const isManager = me?.role === 'owner' || me?.role === 'moderator';
+    const members = await Api.getGroupMembers(groupId);
+    const me = members.find(m => m.user_id === myId);
+    const isOwner = me?.role === 'owner';
+    const isManager = me?.role === 'owner' || me?.role === 'moderator';
 
-        // Fetch user info for display (best-effort).
-        const usersById = {};
-        await Promise.all(members.map(async (m) => {
-            try {
-                usersById[m.user_id] = await Api.getUser(m.user_id);
-            } catch {
-                usersById[m.user_id] = null;
-            }
-        }));
+    // Fetch user info for display (best-effort).
+    const usersById = {};
+    await Promise.all(members.map(async (m) => {
+        try {
+            usersById[m.user_id] = await Api.getUser(m.user_id);
+        } catch {
+            usersById[m.user_id] = null;
+        }
+    }));
 
-        const html = `
-            <div class="modal-overlay active" id="groupMembersModal" role="dialog" aria-modal="true">
-                <div class="modal-box" style="max-width: 760px;">
-                    <div class="modal-header">
-                        <h3>Members: ${groupName}</h3>
-                        <button class="close-modal" id="closeGroupMembers">&times;</button>
-                    </div>
-                    <div style="max-height: 420px; overflow-y: auto;">
-                        <table class="table" style="font-size: 14px;">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Joined</th>
-                                    ${isManager ? '<th></th>' : ''}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${members.map((m) => {
-                                    const u = usersById[m.user_id];
-                                    const name = u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : `User ${String(m.user_id).slice(0, 8)}`;
-                                    const email = u?.email || '';
-                                    const joined = m.joined_at ? new Date(m.joined_at).toLocaleString() : '';
-                                    const role = String(m.role || 'member').toUpperCase();
-                                    const canKick = isManager && m.role !== 'owner' && m.user_id !== myId;
-                                    const canEditRole = isOwner && m.role !== 'owner' && m.user_id !== myId;
-                                    return `
-                                        <tr>
-                                            <td>${name || `User ${String(m.user_id).slice(0, 8)}`}</td>
-                                            <td>${email}</td>
-                                            <td>
-                                                ${canEditRole ? `
-                                                    <select class="role-select" data-member-id="${m.group_member_id}">
-                                                        <option value="MEMBER" ${m.role === 'member' ? 'selected' : ''}>MEMBER</option>
-                                                        <option value="MODERATOR" ${m.role === 'moderator' ? 'selected' : ''}>MODERATOR</option>
-                                                    </select>
-                                                ` : role}
-                                            </td>
-                                            <td>${joined}</td>
-                                            ${isManager ? `
-                                                <td style="text-align:right;">
-                                                    ${canKick ? `<button class="btn btn-danger btn-sm kick-member-btn" data-member-id="${m.group_member_id}" data-name="${name}">Remove</button>` : ''}
-                                                </td>
-                                            ` : ''}
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="group-feedback" id="groupMembersFeedback" aria-live="polite"></div>
+    const html = `
+        <div class="modal-overlay active" id="groupMembersModal" role="dialog" aria-modal="true">
+            <div class="modal-box" style="max-width: 760px;">
+                <div class="modal-header">
+                    <h3>Members: ${groupName}</h3>
+                    <button class="close-modal" id="closeGroupMembers">&times;</button>
                 </div>
+                <div style="max-height: 420px; overflow-y: auto;">
+                    <table class="table" style="font-size: 14px;">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                ${isManager ? '<th></th>' : ''}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${members.map((m) => {
+                                const u = usersById[m.user_id];
+                                const name = u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : `User ${String(m.user_id).slice(0, 8)}`;
+                                const email = u?.email || '';
+                                const joined = m.joined_at ? new Date(m.joined_at).toLocaleString() : '';
+                                const role = String(m.role || 'member').toUpperCase();
+                                const canKick = isManager && m.role !== 'owner' && m.user_id !== myId;
+                                const canEditRole = isOwner && m.role !== 'owner' && m.user_id !== myId;
+                                return `
+                                    <tr>
+                                        <td>${name || `User ${String(m.user_id).slice(0, 8)}`}</td>
+                                        <td>${email}</td>
+                                        <td>
+                                            ${canEditRole ? `
+                                                <select class="role-select" data-member-id="${m.group_member_id}">
+                                                    <option value="MEMBER" ${m.role === 'member' ? 'selected' : ''}>MEMBER</option>
+                                                    <option value="MODERATOR" ${m.role === 'moderator' ? 'selected' : ''}>MODERATOR</option>
+                                                </select>
+                                            ` : role}
+                                        </td>
+                                        <td>${joined}</td>
+                                        ${isManager ? `
+                                            <td style="text-align:right;">
+                                                ${canKick ? `<button class="btn btn-danger btn-sm kick-member-btn" data-member-id="${m.group_member_id}" data-name="${name}">Remove</button>` : ''}
+                                            </td>
+                                        ` : ''}
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="group-feedback" id="groupMembersFeedback" aria-live="polite"></div>
             </div>
-        `;
+        </div>
+    `;
 
-        document.getElementById('groupMembersModal')?.remove();
-        document.body.insertAdjacentHTML('beforeend', html);
+    document.getElementById('groupMembersModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend', html);
 
-        const close = () => closeModal('groupMembersModal');
-        document.getElementById('closeGroupMembers')?.addEventListener('click', close);
-        document.getElementById('groupMembersModal')?.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) close();
-        });
+    const close = () => closeModal('groupMembersModal');
+    document.getElementById('closeGroupMembers')?.addEventListener('click', close);
+    document.getElementById('groupMembersModal')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) close();
+    });
 
-        document.querySelectorAll('.kick-member-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const memberId = e.currentTarget.dataset.memberId;
-                const name = e.currentTarget.dataset.name || 'this member';
-                const ok = await openConfirmModal({
-                    title: 'Remove Member',
-                    message: `Remove ${name} from this group? They will also be removed from all queues in this group.`,
-                    confirmText: 'Remove',
-                    cancelText: 'Cancel',
-                    confirmClass: 'btn-danger'
-                });
-                if (!ok) return;
-
-                const feedback = document.getElementById('groupMembersFeedback');
-                try {
-                    await Api.removeGroupMember(groupId, memberId);
-                    if (feedback) {
-                        feedback.textContent = '';
-                        feedback.className = 'group-feedback';
-                    }
-                    closeModal('groupMembersModal');
-                    await renderGroupDetail(groupId);
-                } catch (err) {
-                    if (feedback) {
-                        feedback.textContent = err.message || 'Failed to remove member';
-                        feedback.className = 'group-feedback error';
-                    }
-                }
+    document.querySelectorAll('.kick-member-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const memberId = e.currentTarget.dataset.memberId;
+            const name = e.currentTarget.dataset.name || 'this member';
+            const ok = await openConfirmModal({
+                title: 'Remove Member',
+                message: `Remove ${name} from this group? They will also be removed from all queues in this group.`,
+                confirmText: 'Remove',
+                cancelText: 'Cancel',
+                confirmClass: 'btn-danger'
             });
-        });
+            if (!ok) return;
 
-        document.querySelectorAll('.role-select').forEach(sel => {
-            sel.addEventListener('change', async (e) => {
-                const memberId = e.currentTarget.dataset.memberId;
-                const role = e.currentTarget.value;
-                const feedback = document.getElementById('groupMembersFeedback');
-                try {
-                    await Api.updateGroupMemberRole(groupId, memberId, role);
-                    if (feedback) {
-                        feedback.textContent = 'Role updated';
-                        feedback.className = 'group-feedback success';
-                    }
-                } catch (err) {
-                    if (feedback) {
-                        feedback.textContent = err.message || 'Failed to update role';
-                        feedback.className = 'group-feedback error';
-                    }
+            const feedback = document.getElementById('groupMembersFeedback');
+            try {
+                await Api.removeGroupMember(groupId, memberId);
+                closeModal('groupMembersModal');
+                await renderGroupDetail(groupId);
+            } catch (err) {
+                if (feedback) {
+                    feedback.textContent = err.message || 'Failed to remove member';
+                    feedback.className = 'group-feedback error';
                 }
-            });
+            }
         });
-    };
+    });
 
-    await render();
+    document.querySelectorAll('.role-select').forEach(sel => {
+        sel.addEventListener('change', async (e) => {
+            const memberId = e.currentTarget.dataset.memberId;
+            const role = e.currentTarget.value;
+            const feedback = document.getElementById('groupMembersFeedback');
+            try {
+                await Api.updateGroupMemberRole(groupId, memberId, role);
+                if (feedback) {
+                    feedback.textContent = 'Role updated';
+                    feedback.className = 'group-feedback success';
+                }
+            } catch (err) {
+                if (feedback) {
+                    feedback.textContent = err.message || 'Failed to update role';
+                    feedback.className = 'group-feedback error';
+                }
+            }
+        });
+    });
 }
 
 // === МОДАЛЬНОЕ ОКНО: УЧАСТНИКИ И SWAP ===

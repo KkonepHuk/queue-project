@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root{
+    --focus_color:rgb(81, 81, 240);
+    --error_color: rgb(184, 9, 96);
+}
+
+*{
+    margin:0;
+    box-sizing: border-box;
+}
+
+body{
+    height:100vh;
+    display: grid;
+    align-items: center;
+    justify-self: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.form {
+    width: 300px;
+    display: grid;
+    grid-gap: 16px;
+    padding: 32px;
+    padding-bottom: 24px;
+    background-color: lavender;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgb(181, 181, 239, 0.8);
+}
+.title {
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+label{
+    display: block;
+    position: relative;
+}
+input{
+    height: 40px;
+    width: 100%;
+    outline: none;
+    padding: 0 16px;
+    border:  1px solid #ccc;
+    border-radius: 6px;
+}
+input:focus,
+label.filled input{
+    border-color: var(--focus_color);
+}
+label.error input{
+    border-color: var(--error_color);
+}
+input:focus + span,
+label.filled span {
+    cursor: default;
+    top: -15px;
+    left: 8px;
+    font-size: 12px;
+    color: var(--focus_color);
+    background-color: lavender;
+}
+label.error span{
+    color: var(--error_color);
+}
+span{
+    cursor: text;
+    position: absolute;
+    top: 27%;
+    left: 16px;
+    font-weight: 300;
+    color: #555;
+    background-color: #fff;
+    transition: all 0.3s ease-in-out;
+    padding: 0 4px;
+}
+.button {
+    cursor: pointer;
+    justify-self: end;
+    background-color: var(--focus_color);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 4px;
+    margin-top: 8px;
+    border: none;
+    font: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+}
+.button.disable {
+    pointer-events: none;
+    background-color: rgb(95, 95, 169);
+}
+.input-error{
+    color: var(--error_color);
+    font-size: 13px;
+    margin-top: 4px;
+    font-weight: 300;
+    display: none;
+}
+.input-error.view{
+    display: block;
+}
+
+.input-success{
+    color: #1e8e3e;
+    font-size: 13px;
+    margin-top: 4px;
+    font-weight: 300;
+    display: none;
+}
+.input-success.view{
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+.button.primary {
+    background-color: var(--focus_color);
+    color: #fff;
+}
+.button.secondary {
+    text-decoration: none;
+    background-color: transparent;
+    border: 1px solid var(--focus_color);
+    color: var(--focus_color);
+}
+.button.secondary:hover {
+    text-decoration: none;
+    background-color: var(--focus_color);
+    color: #fff;
+}
+.button.disable {
+    pointer-events: none;
+    background-color: rgb(95, 95, 169); 
+    border-color: rgb(95, 95, 169);
+    color: rgba(255, 255, 255, 0.5);
+}

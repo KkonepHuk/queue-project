@@ -4,7 +4,7 @@ const form = {
     emailLabel: document.getElementById('email'),
     passwordLabel: document.getElementById('password'),
     button: document.querySelector('.button.primary'),
-    error: document.querySelector('.input-error')
+    error: document.getElementById('loginError')
 };
 
 const emailInput = form.emailLabel.querySelector('input');
@@ -14,8 +14,7 @@ if (sessionStorage.getItem('regSuccess')) {
     const successMsg = document.getElementById('regSuccessMsg');
     if (successMsg) {
         successMsg.textContent = 'Account created. Log in.';
-        successMsg.style.color = 'green';
-        successMsg.style.display = 'block';
+        successMsg.classList.add('view');
         sessionStorage.removeItem('regSuccess');
     }
 }
@@ -67,12 +66,14 @@ async function handleLogin() {
 }
 
 function showError(msg) {
+    if (!form.error) return;
     form.error.textContent = msg;
     form.error.classList.add('view');
     form.emailLabel.classList.add('error');
 }
 
 function hideError() {
+    if (!form.error) return;
     form.error.classList.remove('view');
     form.emailLabel.classList.remove('error');
 }
