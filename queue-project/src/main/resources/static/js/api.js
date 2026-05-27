@@ -20,7 +20,7 @@ async function request(endpoint, options = {}) {
     // Only force-logout on 401 for authenticated requests (not for login/register).
     if (response.status === 401 && options.auth !== false) {
         sessionStorage.removeItem('authToken');
-        window.location.href = '/index.html';
+        window.location.href = '/login';
         throw new Error('Session expired');
     }
 

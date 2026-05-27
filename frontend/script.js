@@ -57,7 +57,7 @@ async function handleLogin() {
         const response = await Api.login({ email, password });
         
         sessionStorage.setItem('authToken', response.token);
-        window.location.href = '/dashboard.html'; 
+        window.location.href = '/dashboard';
 
     } catch (error) {
         showError(error.message || 'Login failed');

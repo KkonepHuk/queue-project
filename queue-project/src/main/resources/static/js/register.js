@@ -66,7 +66,7 @@ form.addEventListener('submit', async (e) => {
 
         // Успех -> флаг для логина + редирект
         sessionStorage.setItem('regSuccess', 'true');
-        window.location.href = '/index.html';
+        window.location.href = '/login';
     } catch (error) {
         console.error(error);
         showError(error.message || 'Registration failed');

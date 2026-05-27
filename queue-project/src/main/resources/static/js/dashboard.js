@@ -1,7 +1,7 @@
 import { Api } from './api.js';
 
 const token = sessionStorage.getItem('authToken');
-if (!token) window.location.href = '/index.html';
+if (!token) window.location.href = '/login';
 
 const content = document.getElementById('content');
 const pageTitle = document.getElementById('pageTitle');
@@ -19,7 +19,7 @@ async function loadUserProfile() {
         document.querySelector('.avatar').textContent = initials;
         updateNotificationsBadge();
     } catch (err) {
-        window.location.href = '/index.html';
+        window.location.href = '/login';
     }
 }
 
@@ -1364,7 +1364,7 @@ async function renderNotifications() {
 // === ЗАПУСК ===
 logoutBtn.addEventListener('click', () => {
     sessionStorage.removeItem('authToken');
-    window.location.href = '/index.html';
+    window.location.href = '/login';
 });
 
 navItems.forEach(item => {
