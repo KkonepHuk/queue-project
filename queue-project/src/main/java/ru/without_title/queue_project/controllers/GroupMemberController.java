@@ -44,6 +44,15 @@ public class GroupMemberController {
         );
     }
 
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveGroup(
+            @PathVariable UUID groupId,
+            Authentication authentication
+    ) {
+        service.leaveGroup(groupId, authentication.getName());
+    }
+
     // --------------------- Получить всех ---------------------
     @GetMapping
     public List<GroupMemberResponse> getMembers(@PathVariable UUID groupId) {
@@ -69,9 +78,13 @@ public class GroupMemberController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMember(
             @PathVariable UUID groupId,
-            @PathVariable UUID memberId
+            @PathVariable UUID memberId,
+            Authentication authentication
     ) {
-        service.removeMember(groupId, memberId);
+        boolean isAdmin = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority()));
+        service.removeMember(groupId, memberId, authentication.getName(), isAdmin);
     }
 
     // --------------------- Изменить роль ---------------------

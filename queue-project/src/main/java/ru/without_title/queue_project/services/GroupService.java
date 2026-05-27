@@ -70,6 +70,14 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
+    public List<Group> getMyGroups(String userEmail) {
+        UUID userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+
+        return groupMemberRepository.findGroupsByUserId(userId);
+    }
+
     // --------------------- Обновление группы ---------------------
     public Group updateGroup(UUID groupId, GroupCreateRequest request) {
 

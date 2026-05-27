@@ -1,6 +1,7 @@
 package ru.without_title.queue_project.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.dto.response.NotificationResponse;
 import ru.without_title.queue_project.services.NotificationService;
@@ -19,9 +20,8 @@ public class NotificationController {
     }
 
     @GetMapping
-    public List<NotificationResponse> getMyNotifications() {
-        // Тут тоже будет фильтрация по текущему юзеру
-        return notificationService.getAllMyNotifications().stream()
+    public List<NotificationResponse> getMyNotifications(Authentication authentication) {
+        return notificationService.getMyNotifications(authentication.getName()).stream()
                 .map(NotificationResponse::fromEntity)
                 .toList();
     }

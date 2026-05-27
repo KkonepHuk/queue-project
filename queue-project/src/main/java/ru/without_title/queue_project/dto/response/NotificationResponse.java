@@ -20,7 +20,7 @@ public record NotificationResponse(
         return new NotificationResponse(
                 entity.getNotificationId(),
                 entity.getUser().getUserId(),
-                entity.getQueue().getQueueId(),
+                entity.getQueue() == null ? null : entity.getQueue().getQueueId(),
                 entity.getType(),
                 entity.getMessage(),
                 entity.getScheduledAt(),

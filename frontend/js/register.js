@@ -1,5 +1,4 @@
-const API_URL = '/api/v1';
-const USE_MOCK = false;
+import { Api } from './api.js';
 
 const form = document.getElementById('regForm');
 const btn = form.querySelector('.button');
@@ -13,7 +12,7 @@ const inputs = {
     confirm: form.querySelector('#confirmPassword input')
 };
 
-//плавающие лейблы + активация кнопки
+// Плавающие лейблы + активация кнопки
 Object.values(inputs).forEach(input => {
     const updateField = () => {
         input.closest('label').classList.toggle('filled', input.value.trim() !== '');
@@ -51,6 +50,7 @@ form.addEventListener('submit', async (e) => {
     const firstName = inputs.firstName.value.trim();
     const lastName = inputs.lastName.value.trim();
 
+    // Клиентская валидация
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) return showError('Invalid email format');
     if (pass.length < 8) return showError('Password must be at least 8 characters');
@@ -59,27 +59,12 @@ form.addEventListener('submit', async (e) => {
     btn.classList.add('disable');
     btn.textContent = 'Registering...';
 
-    const payload = { email, password: pass, firstName, lastName };
+    const payload = { email, password: pass, first_name: firstName, last_name: lastName };
 
     try {
-        if (USE_MOCK) {
-            await new Promise(r => setTimeout(r, 800));
-        } else {
-            const res = await fetch(`${API_URL}/users/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+        await Api.register(payload);
 
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                if (res.status === 409) throw new Error('Email already registered');
-                if (res.status === 400) throw new Error(errData.message || 'Invalid data');
-                throw new Error(`Server error: ${res.status}`);
-            }
-        }
-
-        // успех -> флаг для логина -> редирект
+        // Успех -> флаг для логина + редирект
         sessionStorage.setItem('regSuccess', 'true');
         window.location.href = '/index.html';
     } catch (error) {

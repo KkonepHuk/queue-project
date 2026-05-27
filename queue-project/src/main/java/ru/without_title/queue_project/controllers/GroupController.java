@@ -42,7 +42,16 @@ public class GroupController {
 
     // --------------------- Получение всех групп ---------------------
     @GetMapping
-    public List<GroupResponse> getAllGroups() {
+    public List<GroupResponse> getMyGroups(Authentication authentication) {
+        return groupService.getMyGroups(authentication.getName())
+                .stream()
+                .map(GroupResponse::fromEntity)
+                .toList();
+    }
+
+    // --------------------- Browse: все группы ---------------------
+    @GetMapping("/browse")
+    public List<GroupResponse> browseGroups() {
         return groupService.getAllGroups()
                 .stream()
                 .map(GroupResponse::fromEntity)

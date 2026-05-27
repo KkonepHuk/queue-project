@@ -60,15 +60,18 @@ public class SecurityConfig {
                                 // создание группы
                                 .requestMatchers(HttpMethod.POST, "/api/v1/groups").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // изменение/удаление группы
-                                .requestMatchers(HttpMethod.PATCH, "/api/v1/groups/**").hasAnyRole("SYSTEM_ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/groups/**").hasAnyRole("SYSTEM_ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/**").hasAnyRole("SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/groups/*").hasAnyRole("SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/groups/*").hasAnyRole("SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/*").hasAnyRole("SYSTEM_ADMIN")
 
                                 // GROUP MEMBERS
                                 // просмотр участников
                                 .requestMatchers(HttpMethod.GET, "/api/v1/groups/*/members").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // вступление в группу
                                 .requestMatchers(HttpMethod.POST, "/api/v1/groups/*/members/me").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/*/members/me").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                // удалить участника (разрешаем USER, но право проверяем в сервисе: только OWNER может кикать)
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/groups/*/members/*").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // управление участниками
                                 .requestMatchers("/api/v1/groups/*/members/**").hasAnyRole("SYSTEM_ADMIN")
                                 // QUEUES
@@ -77,18 +80,21 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/queues/**").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // создание очереди
                                 .requestMatchers(HttpMethod.POST, "/api/v1/groups/*/queues").hasAnyRole("USER", "SYSTEM_ADMIN")
-                                // изменение/удаление очереди
-                                .requestMatchers(HttpMethod.PATCH, "/api/v1/queues/**").hasAnyRole("SYSTEM_ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/queues/**").hasAnyRole("SYSTEM_ADMIN")
-
                                 // QUEUE ACTIONS
                                 // вход/выход из очереди
-                                .requestMatchers("/api/v1/queues/*/join").hasAnyRole("USER", "SYSTEM_ADMIN")
-                                .requestMatchers("/api/v1/queues/*/leave").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/queues/*/join").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/queues/*/leave").hasAnyRole("USER", "SYSTEM_ADMIN")
                                 // просмотр записей очереди
                                 .requestMatchers(HttpMethod.GET, "/api/v1/queues/*/entries").hasAnyRole("USER", "SYSTEM_ADMIN")
-                                // изменение статуса записи
+                                // изменение статуса записи (право проверяем в сервисе: OWNER/MODERATOR/создатель очереди)
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/queues/*/entries/*").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                // другие операции с entries оставляем только админам
                                 .requestMatchers("/api/v1/queues/*/entries/**").hasAnyRole("SYSTEM_ADMIN")
+                                // закрытие/удаление очереди (право проверяем в сервисе: creator или OWNER)
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/queues/*/close").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/queues/*").hasAnyRole("USER", "SYSTEM_ADMIN")
+                                // изменение очереди (пока оставляем только админам)
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/queues/*").hasAnyRole("SYSTEM_ADMIN")
 
                                 // DEFAULT
                                 .anyRequest().authenticated()

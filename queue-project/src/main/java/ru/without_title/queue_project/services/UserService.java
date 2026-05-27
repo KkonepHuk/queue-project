@@ -10,6 +10,7 @@ import ru.without_title.queue_project.dto.request.UserLoginRequest;
 import ru.without_title.queue_project.dto.request.UserRegistrationRequest;
 import ru.without_title.queue_project.dto.request.UserUpdateRequest;
 import ru.without_title.queue_project.dto.response.UserLoginResponse;
+import ru.without_title.queue_project.exceptions.EmailAlreadyExistsException;
 import ru.without_title.queue_project.exceptions.UnauthorizedException;
 import ru.without_title.queue_project.security.JwtTokenUtil;
 
@@ -34,7 +35,7 @@ public class UserService {
     public User registerUser(UserRegistrationRequest request) {
         // Проверка уникальности email
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User with this email already exists");
+            throw new EmailAlreadyExistsException("Email already registered");
         }
 
         // Создание сущности пользователя
