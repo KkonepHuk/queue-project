@@ -1,6 +1,7 @@
 package ru.without_title.queue_project.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.dto.request.GroupMemberCreateRequest;
 import ru.without_title.queue_project.dto.request.GroupMemberUpdateRequest;
@@ -29,6 +30,17 @@ public class GroupMemberController {
     ) {
         return GroupMemberResponse.fromEntity(
                 service.addMember(groupId, request)
+        );
+    }
+
+    @PostMapping("/me")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GroupMemberResponse joinGroup(
+            @PathVariable UUID groupId,
+            Authentication authentication
+    ) {
+        return GroupMemberResponse.fromEntity(
+                service.joinGroup(groupId, authentication.getName())
         );
     }
 

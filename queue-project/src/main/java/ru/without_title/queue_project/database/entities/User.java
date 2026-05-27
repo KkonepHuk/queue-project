@@ -31,7 +31,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false,
-            columnDefinition = "VARCHAR(20) DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN'))")
+            columnDefinition = "VARCHAR(20) DEFAULT 'USER' CHECK (role IN ('USER', 'SYSTEM_ADMIN'))")
     private SystemRole role;
 
     @CreationTimestamp

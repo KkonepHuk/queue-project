@@ -23,7 +23,7 @@ public class Group {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "created_by", updatable = false, nullable = false)
+    @JoinColumn(name = "created_by", updatable = false, nullable = false)
     private User createdBy;
 
     @CreationTimestamp

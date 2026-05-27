@@ -53,6 +53,18 @@ public class GroupMemberService {
         return groupMemberRepository.save(member);
     }
 
+    public GroupMember joinGroup(UUID groupId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        GroupMemberCreateRequest request = new GroupMemberCreateRequest(
+                user.getUserId(),
+                GroupRole.MEMBER
+        );
+
+        return addMember(groupId, request);
+    }
+
     // --------------------- Получить участника ---------------------
     public GroupMember getMember(UUID groupId, UUID memberId) {
 

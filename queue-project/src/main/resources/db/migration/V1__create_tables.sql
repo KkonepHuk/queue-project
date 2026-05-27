@@ -47,10 +47,9 @@ CREATE TABLE queues (
     reg_close TIMESTAMP NOT NULL,
     max_size INTEGER NOT NULL CHECK (max_size > 0),
     is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-
-    CHECK (reg_open < reg_close)
-    CHECK (reg_open < event_date)
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (reg_open < reg_close),
+    CHECK (reg_open < event_date),
     CHECK (reg_close <= event_date)
 );
 
@@ -76,7 +75,7 @@ CREATE TABLE notifications (
     scheduled_at TIMESTAMP NOT NULL,
     sent_at TIMESTAMP,
     status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'SENT', 'READ')) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    CHECK(status = 'PENDING' OR sent_at != NULL)
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK(status = 'PENDING' OR sent_at IS NOT NULL),
     CHECK((type = 'QUEUE' AND queue_id IS NOT NULL) OR (type = 'SYSTEM' AND queue_id IS NULL))
 );

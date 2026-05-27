@@ -1,11 +1,13 @@
 package ru.without_title.queue_project.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.without_title.queue_project.database.entities.Group;
 import ru.without_title.queue_project.dto.request.GroupCreateRequest;
 import ru.without_title.queue_project.dto.response.GroupResponse;
 import ru.without_title.queue_project.services.GroupService;
+import ru.without_title.queue_project.services.UserService;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,15 +17,18 @@ import java.util.UUID;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserService userService;
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, UserService userService) {
         this.groupService = groupService;
+        this.userService = userService;
     }
 
     // --------------------- Создание группы ---------------------
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GroupResponse createGroup(@RequestBody GroupCreateRequest request) {
+    public GroupResponse createGroup(@RequestBody GroupCreateRequest request, Authentication authentication) {
+        request.setCreatedBy(userService.getUserByEmail(authentication.getName()).getUserId());
         Group group = groupService.createGroup(request);
         return GroupResponse.fromEntity(group);
     }
@@ -45,7 +50,7 @@ public class GroupController {
     }
 
     // --------------------- Обновление группы ---------------------
-    @PutMapping("/{groupId}")
+    @RequestMapping(value = "/{groupId}", method = {RequestMethod.PATCH, RequestMethod.PUT})
     public GroupResponse updateGroup(
             @PathVariable UUID groupId,
             @RequestBody GroupCreateRequest request) {
@@ -54,7 +59,7 @@ public class GroupController {
     }
 
     // --------------------- Удаление группы ---------------------
-    @DeleteMapping("/groups/{groupId}")
+    @DeleteMapping("/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGroup(@PathVariable UUID groupId, @RequestParam UUID userId) {
         // В будущем userId будет браться автоматически из заголовка/токена
