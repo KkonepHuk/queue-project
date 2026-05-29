@@ -2,36 +2,52 @@ services:
   postgres:
     image: postgres:17
     container_name: queue_db
+
     restart: unless-stopped
+
     environment:
-      POSTGRES_DB: queue_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     networks:
       - queue-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
+
     container_name: queue_project_app
+
     restart: unless-stopped
+
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/queue_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      JWT_SECRET: queue-project-app-2026-super-secure-secret-key-minimum-64-character-never-share-this!!!
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: 86400000
       JWT_HEADER: Authorization
       JWT_PREFIX: "Bearer "
+
     ports:
       - "8080:8080"
+
     networks:
       - queue-network
 
