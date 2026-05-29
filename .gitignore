@@ -10,3 +10,5 @@
 
 ### Mac Files ###
 .DS_Store
+
+.env
