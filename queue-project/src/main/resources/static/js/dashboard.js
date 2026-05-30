@@ -1097,6 +1097,20 @@ async function handleCreateEvent(e, groupId) {
         return;
     }
 
+    const now = Date.now();
+
+    if (eventMs < now) {
+        feedback.textContent = 'Event date must be in the future';
+        feedback.className = 'group-feedback error';
+        return;
+    }
+
+    if (payload.max_size <= 0) {
+        feedback.textContent = 'Max size must be greater than 0';
+        feedback.className = 'group-feedback error';
+        return;
+    }
+
     btn.disabled = true;
     btn.textContent = 'Creating...';
 
