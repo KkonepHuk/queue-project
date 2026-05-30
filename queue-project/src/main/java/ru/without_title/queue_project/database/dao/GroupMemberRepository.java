@@ -22,6 +22,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, UUID> 
 
     Optional<GroupMember> findByGroup_GroupIdAndUser_UserId(UUID groupId, UUID userId);
 
+    int countByGroup_GroupId(UUID groupId);
+
     @Query("select gm.group from GroupMember gm where gm.user.userId = :userId")
     List<ru.without_title.queue_project.database.entities.Group> findGroupsByUserId(@Param("userId") UUID userId);
 }

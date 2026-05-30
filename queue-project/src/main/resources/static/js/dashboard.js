@@ -132,27 +132,44 @@ async function updateQueueLiveState(groupId) {
 }
 
 function getQueuePhase(queue, nowMs) {
+
+    const activeFlag = queue.is_active ?? queue.isActive ?? true;
+    const isRandom = queue.random_queue ?? queue.randomQueue ?? false;
+
+    const eventMs = queue.event_date ? new Date(queue.event_date).getTime() : NaN;
+
+
+    // отдельная логика random queue
+    if (isRandom) {
+
+        if (Number.isFinite(eventMs) && nowMs < eventMs) {
+            return { badgeClass: 'awaiting', label: 'Awaiting Event' };
+        }
+
+        return { badgeClass: 'active', label: 'Active Queue' };
+    }
+
+    // ===== обычная логика =====
     const regOpenMs = queue.reg_open ? new Date(queue.reg_open).getTime() : NaN;
     const regCloseMs = queue.reg_close ? new Date(queue.reg_close).getTime() : NaN;
-    const eventMs = queue.event_date ? new Date(queue.event_date).getTime() : NaN;
-    const activeFlag = !!queue.is_active;
 
     if (!activeFlag) return { badgeClass: 'closed', label: 'Closed' };
 
     if (Number.isFinite(regOpenMs) && nowMs < regOpenMs) {
         return { badgeClass: 'pending', label: 'Awaiting Registration' };
     }
-    if (Number.isFinite(regOpenMs) && Number.isFinite(regCloseMs) && nowMs >= regOpenMs && nowMs <= regCloseMs) {
+    if (Number.isFinite(regOpenMs) && Number.isFinite(regCloseMs) &&
+        nowMs >= regOpenMs && nowMs <= regCloseMs) {
         return { badgeClass: 'registration', label: 'Registration' };
     }
-    if (Number.isFinite(regCloseMs) && Number.isFinite(eventMs) && nowMs > regCloseMs && nowMs < eventMs) {
+    if (Number.isFinite(regCloseMs) && Number.isFinite(eventMs) &&
+        nowMs > regCloseMs && nowMs < eventMs) {
         return { badgeClass: 'awaiting', label: 'Awaiting Event' };
     }
     if (Number.isFinite(eventMs) && nowMs >= eventMs) {
         return { badgeClass: 'active', label: 'Active Queue' };
     }
 
-    // Fallback: if dates are missing/odd, treat as closed-ish.
     return { badgeClass: 'closed', label: 'Closed' };
 }
 
@@ -297,8 +314,11 @@ async function renderGroupDetail(groupId) {
                                                 <button class="btn btn-secondary btn-sm list-btn" data-queue-id="${queue.queue_id}">👥 List</button>
                                                 ${canDeleteQueue ? `<button class="btn btn-danger btn-sm delete-queue-btn" data-queue-id="${queue.queue_id}" title="Delete queue">🗑️</button>` : ''}
                                                 ${isJoined 
-                                                    ? `<button class="btn btn-danger btn-sm leave-btn" data-queue-id="${queue.queue_id}">Leave Queue</button>` 
-                                                    : `<button class="btn btn-primary btn-sm join-btn" data-queue-id="${queue.queue_id}" ${!canJoin ? 'disabled' : ''} ${!canJoin && joinDisabledTitle ? `title="${joinDisabledTitle}"` : ''}>Join Queue</button>`
+                                                    ? `<button class="btn btn-danger btn-sm leave-btn" data-queue-id="${queue.queue_id}">Leave Queue</button>`
+                                                    : (queue.random_queue
+                                                        ? `<span class="status-badge skipped">Random order</span>`
+                                                        : `<button class="btn btn-primary btn-sm join-btn" data-queue-id="${queue.queue_id}" ${!canJoin ? 'disabled' : ''} ${!canJoin && joinDisabledTitle ? `title="${joinDisabledTitle}"` : ''}>Join Queue</button>`
+                                                      )
                                                 }
                                             </div>
                                         </td>
@@ -1005,19 +1025,33 @@ function openEventModal(groupId) {
                             <label>Event Date *</label>
                             <input type="datetime-local" id="eventDate" required>
                         </div>
-                        <div class="form-group">
+                        <div id="maxSizeBlock" class="form-group">
                             <label>Max Size *</label>
                             <input type="number" id="eventMaxSize" required placeholder="20">
                         </div>
                     </div>
-                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="form-group">
-                            <label>Reg Open *</label>
-                            <input type="datetime-local" id="regOpen" required>
+                    <div id="registrationFields">
+                        <div id="regBlock" class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group">
+                                <label>Reg Open *</label>
+                                <input type="datetime-local" id="regOpen" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Reg Close *</label>
+                                <input type="datetime-local" id="regClose" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Reg Close *</label>
-                            <input type="datetime-local" id="regClose" required>
+                    </div>
+                    <div class="form-group switch-group">
+                        <div class="switch-container">
+                            <div class="switch-text">
+                                <label for="randomQueue">Random queue order</label>
+                            </div>
+
+                            <label class="switch">
+                                <input type="checkbox" id="randomQueue">
+                                <span class="slider"></span>
+                            </label>
                         </div>
                     </div>
                     <div class="modal-actions">
@@ -1036,6 +1070,69 @@ function openEventModal(groupId) {
         if (e.target.classList.contains('modal-overlay')) closeModalEvent();
     });
     document.getElementById('createEventForm').addEventListener('submit', (e) => handleCreateEvent(e, groupId));
+
+    const randomQueueCheckbox = document.getElementById('randomQueue');
+    const registrationFields = document.getElementById('registrationFields');
+    const maxSizeBlock = document.getElementById('maxSizeBlock');
+    const regBlock = document.getElementById('regBlock');
+
+    function toggleRandomQueue(isRandom) {
+        const registrationFields = document.getElementById('registrationFields');
+        const maxSizeBlock = document.getElementById('maxSizeBlock');
+        const maxSizeInput = document.getElementById('eventMaxSize');
+
+        const regOpen = document.getElementById('regOpen');
+        const regClose = document.getElementById('regClose');
+
+        if (isRandom) {
+            registrationFields.style.display = 'none';
+            maxSizeBlock.style.display = 'none';
+
+            maxSizeInput.disabled = true;
+            maxSizeInput.value = '';
+
+            regOpen.disabled = true;
+            regClose.disabled = true;
+            regOpen.value = '';
+            regClose.value = '';
+
+        } else {
+            registrationFields.style.display = '';
+            maxSizeBlock.style.display = '';
+
+            maxSizeInput.disabled = false;
+
+            regOpen.disabled = false;
+            regClose.disabled = false;
+        }
+    }
+
+    randomQueueCheckbox.addEventListener('change', (e) => {
+        toggleRandomQueue(e.target.checked);
+    });
+
+    // чтобы сразу применялось при открытии модалки
+    toggleRandomQueue(randomQueueCheckbox.checked);
+
+    randomQueueCheckbox.addEventListener('change', () => {
+        const regOpen = document.getElementById('regOpen');
+        const regClose = document.getElementById('regClose');
+
+        if (randomQueueCheckbox.checked) {
+            registrationFields.style.display = 'none';
+
+            regOpen.required = false;
+            regClose.required = false;
+            regOpen.value = '';
+            regClose.value = '';
+
+        } else {
+            registrationFields.style.display = '';
+
+            regOpen.required = true;
+            regClose.required = true;
+        }
+    });
 }
 
 function closeModalEvent() {
@@ -1050,6 +1147,8 @@ async function handleCreateEvent(e, groupId) {
     e.preventDefault();
     const btn = document.getElementById('submitEvent');
     const feedback = document.getElementById('eventFeedback');
+
+    const randomQueue = document.getElementById('randomQueue').checked;
     
     const payload = {
         title: document.getElementById('eventTitle').value,
@@ -1057,7 +1156,8 @@ async function handleCreateEvent(e, groupId) {
         event_date: document.getElementById('eventDate').value,
         reg_open: document.getElementById('regOpen').value,
         reg_close: document.getElementById('regClose').value,
-        max_size: parseInt(document.getElementById('eventMaxSize').value)
+        max_size: parseInt(document.getElementById('eventMaxSize').value),
+        random_queue: randomQueue
     };
 
     if (feedback) {
@@ -1065,50 +1165,53 @@ async function handleCreateEvent(e, groupId) {
         feedback.className = 'group-feedback';
     }
 
-    const eventMs = payload.event_date ? new Date(payload.event_date).getTime() : NaN;
-    const openMs = payload.reg_open ? new Date(payload.reg_open).getTime() : NaN;
-    const closeMs = payload.reg_close ? new Date(payload.reg_close).getTime() : NaN;
-    if (!Number.isFinite(eventMs) || !Number.isFinite(openMs) || !Number.isFinite(closeMs)) {
-        if (feedback) {
-            feedback.textContent = 'Please provide valid dates';
-            feedback.className = 'group-feedback error';
-        }
-        return;
-    }
-    if (!(openMs < closeMs)) {
-        if (feedback) {
-            feedback.textContent = 'Registration open must be before registration close';
-            feedback.className = 'group-feedback error';
-        }
-        return;
-    }
-    if (!(openMs < eventMs)) {
-        if (feedback) {
-            feedback.textContent = 'Registration open must be before the event date';
-            feedback.className = 'group-feedback error';
-        }
-        return;
-    }
-    if (closeMs > eventMs) {
-        if (feedback) {
-            feedback.textContent = 'Registration close must be on/before the event date';
-            feedback.className = 'group-feedback error';
-        }
-        return;
-    }
+    const ALLOWANCE = 60 * 1000; // 1 минута
+    const eventMs = new Date(payload.event_date).getTime();
+    const nowMs = Date.now();
 
-    const now = Date.now();
+        if (eventMs < nowMs - ALLOWANCE) {
+            feedback.textContent = 'Event date must be in the future';
+            feedback.className = 'group-feedback error';
+            return;
+        }
 
-    if (eventMs < now) {
-        feedback.textContent = 'Event date must be in the future';
-        feedback.className = 'group-feedback error';
-        return;
-    }
+        if (payload.max_size <= 0) {
+            feedback.textContent = 'Max size must be greater than 0';
+            feedback.className = 'group-feedback error';
+            return;
+        }
 
-    if (payload.max_size <= 0) {
-        feedback.textContent = 'Max size must be greater than 0';
-        feedback.className = 'group-feedback error';
-        return;
+    if (!randomQueue) {
+        const openMs = payload.reg_open ? new Date(payload.reg_open).getTime() : NaN;
+        const closeMs = payload.reg_close ? new Date(payload.reg_close).getTime() : NaN;
+        if (!Number.isFinite(eventMs) || !Number.isFinite(openMs) || !Number.isFinite(closeMs)) {
+            if (feedback) {
+                feedback.textContent = 'Please provide valid dates';
+                feedback.className = 'group-feedback error';
+            }
+            return;
+        }
+        if (!(openMs < closeMs)) {
+            if (feedback) {
+                feedback.textContent = 'Registration open must be before registration close';
+                feedback.className = 'group-feedback error';
+            }
+            return;
+        }
+        if (!(openMs < eventMs)) {
+            if (feedback) {
+                feedback.textContent = 'Registration open must be before the event date';
+                feedback.className = 'group-feedback error';
+            }
+            return;
+        }
+        if (closeMs > eventMs) {
+            if (feedback) {
+                feedback.textContent = 'Registration close must be on/before the event date';
+                feedback.className = 'group-feedback error';
+            }
+            return;
+        }
     }
 
     btn.disabled = true;

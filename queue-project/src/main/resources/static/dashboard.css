@@ -742,3 +742,94 @@ input:disabled {
 .btn-danger:hover {
     background: #c0392b;
 }
+/* ===== Queue Generation Switch ===== */
+
+.switch-group {
+    margin-top: 8px;
+    margin-bottom: 18px;
+}
+
+.switch-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    padding: 14px 16px;
+
+    border: 1px solid #e8ecf1;
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.switch-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.switch-text label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    cursor: pointer;
+}
+
+.switch-text small {
+    font-size: 12px;
+    color: #7f8c8d;
+    line-height: 1.4;
+}
+
+/* скрываем стандартный checkbox */
+.switch input {
+    display: none;
+}
+
+.switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+
+    background: #d5dbe3;
+    border-radius: 999px;
+
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.slider::before {
+    content: "";
+
+    position: absolute;
+    width: 20px;
+    height: 20px;
+
+    left: 3px;
+    top: 3px;
+
+    background: white;
+    border-radius: 50%;
+
+    transition: 0.25s;
+    box-shadow: 0 2px 5px rgba(0,0,0,.15);
+}
+
+.switch input:checked + .slider {
+    background: #6f22db;
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(22px);
+}
+
+#registrationFields {
+    transition: all 0.25s ease;
+}

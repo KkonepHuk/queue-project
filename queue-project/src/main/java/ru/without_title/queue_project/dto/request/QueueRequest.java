@@ -8,5 +8,6 @@ public record QueueRequest(
         LocalDateTime eventDate,
         LocalDateTime regOpen,
         LocalDateTime regClose,
-        Integer maxSize) {
+        Integer maxSize,
+        Boolean randomQueue) {
 }

@@ -67,6 +67,7 @@ function toQueueDto(queue, participants = []) {
         reg_open: queue.regOpen,
         reg_close: queue.regClose,
         max_size: queue.maxSize,
+        random_queue: queue.randomQueue,
         is_active: queue.isActive,
         created_at: queue.createdAt,
         participants,
@@ -130,7 +131,8 @@ function toBackendQueue(data) {
         eventDate: data.event_date,
         regOpen: data.reg_open,
         regClose: data.reg_close,
-        maxSize: data.max_size
+        maxSize: data.max_size,
+        randomQueue: data.random_queue
     };
 }
 

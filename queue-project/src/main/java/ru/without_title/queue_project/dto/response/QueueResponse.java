@@ -14,6 +14,7 @@ public record QueueResponse(
         LocalDateTime regOpen,
         LocalDateTime regClose,
         Integer maxSize,
+        boolean randomQueue,
         boolean isActive,
         LocalDateTime createdAt) {
     public static QueueResponse fromEntity(Queue entity) {
@@ -27,6 +28,7 @@ public record QueueResponse(
                 entity.getRegOpen(),
                 entity.getRegClose(),
                 entity.getMaxSize(),
+                entity.isRandomQueue(),
                 entity.getIsActive(),
                 entity.getCreatedAt());
     }

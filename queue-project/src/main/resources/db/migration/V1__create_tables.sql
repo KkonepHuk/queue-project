@@ -40,17 +40,33 @@ CREATE TABLE queues (
     queue_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID NOT NULL REFERENCES groups(group_id) ON DELETE CASCADE,
     created_by UUID NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+
     title VARCHAR(255) NOT NULL,
     description TEXT,
+
     event_date TIMESTAMP NOT NULL,
-    reg_open TIMESTAMP NOT NULL,
-    reg_close TIMESTAMP NOT NULL,
+
+    reg_open TIMESTAMP,
+    reg_close TIMESTAMP,
+
+    random_queue BOOLEAN NOT NULL DEFAULT FALSE,
+
     max_size INTEGER NOT NULL CHECK (max_size > 0),
     is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CHECK (reg_open < reg_close),
-    CHECK (reg_open < event_date),
-    CHECK (reg_close <= event_date)
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+    CHECK (
+        (random_queue = TRUE AND reg_open IS NULL AND reg_close IS NULL)
+        OR
+        (
+            random_queue = FALSE
+            AND reg_open IS NOT NULL
+            AND reg_close IS NOT NULL
+            AND reg_open < reg_close
+            AND reg_open < event_date
+            AND reg_close <= event_date
+        )
+    )
 );
 
 -- Таблица queue_entries

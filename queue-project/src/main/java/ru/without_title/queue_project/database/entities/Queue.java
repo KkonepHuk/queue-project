@@ -32,14 +32,17 @@ public class Queue {
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
-    @Column(name = "reg_open", nullable = false)
+    @Column(name = "reg_open")
     private LocalDateTime regOpen;
 
-    @Column(name = "reg_close", nullable = false)
+    @Column(name = "reg_close")
     private LocalDateTime regClose;
 
     @Column(name = "max_size", nullable = false)
     private Integer maxSize;
+
+    @Column(name = "random_queue")
+    private boolean randomQueue;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
@@ -47,6 +50,7 @@ public class Queue {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
 
     public Queue() {
     }
@@ -138,4 +142,8 @@ public class Queue {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+
+    public void setRandomQueue(boolean randomQueue) { this.randomQueue = randomQueue; }
+
+    public boolean isRandomQueue() { return randomQueue; }
 }
