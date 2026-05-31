@@ -3,7 +3,7 @@ package ru.without_title.queue_project;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,9 +44,10 @@ class QueueControllerTest {
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusHours(5),
-                30);
+                30,
+                false);
 
-        when(queueService.createQueue(eq(groupId), any(QueueRequest.class))).thenReturn(new Queue());
+        when(queueService.createQueue(eq(groupId), any(QueueRequest.class), "test@mail.ru")).thenReturn(new Queue());
 
         mockMvc.perform(post("/api/v1/groups/{groupId}/queues", groupId)
                 .contentType(MediaType.APPLICATION_JSON)
