@@ -902,8 +902,12 @@ function openModal() {
     `;
     document.body.insertAdjacentHTML('beforeend', html);
     
-    document.getElementById('closeCreateGroup').onclick = closeModal;
-    document.getElementById('cancelCreateGroup').onclick = closeModal;
+    document.getElementById('closeCreateGroup').onclick = () => {
+        closeModal();
+    };
+    document.getElementById('cancelCreateGroup').onclick = () => {
+            closeModal();
+        };
     document.getElementById('createGroupModal').addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) closeModal();
     });
