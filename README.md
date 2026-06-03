@@ -86,14 +86,12 @@ POSTGRES_DB=queue_db
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 
+JWT_SECRET=your-secret-key
+
 SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/queue_db
 SPRING_DATASOURCE_USERNAME=postgres
 SPRING_DATASOURCE_PASSWORD=postgres
 
-JWT_SECRET=your-secret-key
-JWT_EXPIRATION=86400000
-JWT_HEADER=Authorization
-JWT_PREFIX=Bearer
 ```
 
 ---
