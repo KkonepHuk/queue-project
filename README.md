@@ -1,66 +1,138 @@
 # Queue project
 
-Проект реализует систему для создания событий и менеджмента очередейю.
+Queue Project — это веб-приложение для создания событий и управления очередями.
+
+Основные возможности:
+
+- создание групп
+- создание событий
+- запись пользователей в очередь
+- управление участниками очереди
+- авторизация и регистрация пользователей (JWT)
+- просмотр и управление активными очередями
 
 ---
 
-## 🔹 Требования
+## 🌐 Демо
 
-- Java 17+
-- Maven
-- Docker
+Приложение доступно онлайн:
+
+👉 https://qapp.space
+
+
+---
+
+## 🧱 Архитектура
+
+Система состоит из трёх основных компонентов:
+
+- **Frontend** — пользовательский интерфейс (HTML, CSS, JavaScript)
+- **Backend** — REST API на Spring Boot
+- **Database** — PostgreSQL
+
+Все сервисы запускаются в Docker-контейнерах и взаимодействуют через внутреннюю сеть Docker.
+
+```
+Frontend → Backend (REST API) → PostgreSQL
+```
+
+---
+
+## ⚙️ Технологии
+
+### Backend
+- Java 21
+- Spring Boot
+- Spring Security (JWT)
+- Spring Data JPA
 - PostgreSQL
 
+### Frontend
+- HTML5
+- CSS3
+- JavaScript (Vanilla)
+
+### DevOps
+- Docker
+- Docker Compose
+- Multi-stage Docker build
+- Environment variables (.env)
+
+
 ---
 
-## 🔹 Развёртывание проекта через Docker
+## Требования
 
-### Склонируй репозиторий
+- Docker Engine 24+
+- Docker Compose
 
-```bash
-git clone <repo_url>
-cd queue_project
-```
-
-### Запуск PostgreSQL через Docker
+Проверить установку:
 
 ```bash
-docker compose up -d
+docker --version
+docker compose version
 ```
 
-Это поднимет контейнер PostgreSQL и настроит базу данных согласно `docker-compose.yml`.
+> Java, Maven и PostgreSQL устанавливать не нужно — всё запускается внутри контейнеров.
 
-### Проверка запущенных контейнеров
+---
+
+## 📁 Переменные окружения
+
+Перед запуском необходимо создать файл `.env` в корне проекта:
+
+```env
+POSTGRES_DB=queue_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/queue_db
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
+
+JWT_SECRET=your-secret-key
+JWT_EXPIRATION=86400000
+JWT_HEADER=Authorization
+JWT_PREFIX=Bearer
+```
+
+---
+
+## 🚀 Локальный запуск
+
+### 1. Клонирование проекта
+
+```bash
+git clone https://github.com/KkonepHuk/queue-project.git
+cd queue-project
+```
+
+---
+
+### 2. Запуск всех сервисов
+
+```bash
+docker compose up --build -d
+```
+
+Запустятся:
+
+- frontend
+- backend
+- postgres
+
+---
+
+### 3. Проверка
 
 ```bash
 docker ps
 ```
 
-Убедись, что контейнер с базой **queue_db** запущен и слушает порт **5433**.
-
-### Остановка и удаление контейнеров
-
-```bash
-docker compose down -v
-```
-
 ---
 
-## 🔹 Запуск Spring Boot приложения
-
-### Собрать проект
-
-```bash
-mvn clean install
-```
-
-### Запустить приложение
-
-```bash
-mvn spring-boot:run
-```
-
-Сервер будет доступен по адресу:
+### 4. Доступ
+Локальное приложение будет доступно на
 
 ```
 http://localhost:8080
@@ -68,76 +140,14 @@ http://localhost:8080
 
 ---
 
-## 🔹 Тестирование API
-
-### Регистрация пользователя
-
-```
-POST /api/users/register
-Content-Type: application/json
-```
-
-```json
-{
-  "email": "test@example.com",
-  "password": "123456",
-  "firstName": "John",
-  "lastName": "Doe"
-}
-```
-
-### Логин
-
-```
-POST /api/users/login
-Content-Type: application/json
-```
-
-```json
-{
-  "email": "test@example.com",
-  "password": "123456"
-}
-```
-
-Используй **Postman** для отправки запросов.
-
----
-
-## 🔹 Подключение к базе данных вручную
-
-Если база работает через Docker:
+## ⛔ Остановка
 
 ```bash
-psql -h localhost -p 5433 -U postgres -d queue_db
+docker compose down
 ```
 
-Пароль:
+Удалить данные:
 
+```bash
+docker compose down -v
 ```
-postgres
-```
-
-или пароль, указанный в `docker-compose.yml`.
-
-### Полезные команды psql
-
-```sql
-\dt
-```
-
-Показать таблицы.
-
-```sql
-SELECT * FROM users;
-```
-
-Посмотреть всех пользователей.
-
----
-
-## 🔹 Советы
-
-- Перед первым запуском убедись, что **порт 5433 свободен**.
-- Если база не создаётся — проверь **переменные окружения в `docker-compose.yml`**.
-- Для тестирования API удобно использовать **Postman**.
